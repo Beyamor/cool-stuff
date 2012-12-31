@@ -71,30 +71,38 @@
   [number-to-generate pattern-length model]
   (take number-to-generate (repeatedly #(build-string pattern-length model))))
 
+(defn build-new-strings
+  "Creates some number of strings using the given model,
+   none of which appeared in the original set of strings."
+  [original-strings number-to-generate pattern-length model]
+  (let [original-set (set original-strings)]
+    (loop [new-strings []]
+      (if (>= (count new-strings) number-to-generate)
+        new-strings
+        (let [new-string (build-string pattern-length model)]
+          (if (original-set new-string)
+            (recur new-strings)
+            (recur (conj new-strings new-string))))))))
+
 (defn build-model-from-lines
   "Builds a model from a bunch of text lines."
   [pattern-length lines]
   (build-model-from-patterns
     (map (partial patterns pattern-length) lines)))
 
-(defn build-model-from-file
-  "Reads line-separated strings from a file
-   and createsa a model based on them."
-  [pattern-length f]
-  (with-open [rdr (reader f)]
-    (build-model-from-lines pattern-length (line-seq rdr))))
-
 (defn print-strings
-  "Prints a bunch of strings generated from a model."
-  [number-to-print pattern-length model]
+  "Prints a bunch of strings generated from a model using the generator method."
+  [generator number-to-print pattern-length model]
   (dorun
     (map-indexed
       (fn [index string] (println (str index ": " string)))
-      (build-strings number-to-print pattern-length model))))
+      (generator number-to-print pattern-length model))))
 
 (defn -main
   [input-file & args]
   (let [pattern-length 3
         number-to-print 20
-        model (build-model-from-file pattern-length input-file)]
-    (print-strings number-to-print pattern-length model)))
+        lines (line-seq (reader input-file))
+        model (build-model-from-lines pattern-length lines)
+        generator (partial build-new-strings lines)]
+    (print-strings generator number-to-print pattern-length model)))
