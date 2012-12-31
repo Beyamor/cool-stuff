@@ -66,23 +66,27 @@
         s
         (recur (str s result))))))
 
+(defn- build-filtered-strings
+  "Creates some number of strings using the given model,
+   filtering the strings with the provided predicate function."
+  [predicate number-to-generate pattern-length model]
+  (take number-to-generate
+        (filter predicate (repeatedly #(build-string pattern-length model)))))
+
 (defn build-strings
   "Creates some number of strings using the given model."
   [number-to-generate pattern-length model]
-  (take number-to-generate (repeatedly #(build-string pattern-length model))))
+  (build-filtered-strings
+    (constantly true)
+    number-to-generate pattern-length model))
 
 (defn build-new-strings
   "Creates some number of strings using the given model,
    none of which appeared in the original set of strings."
   [original-strings number-to-generate pattern-length model]
-  (let [original-set (set original-strings)]
-    (loop [new-strings []]
-      (if (>= (count new-strings) number-to-generate)
-        new-strings
-        (let [new-string (build-string pattern-length model)]
-          (if (original-set new-string)
-            (recur new-strings)
-            (recur (conj new-strings new-string))))))))
+  (build-filtered-strings
+    (-> original-strings set complement)
+    number-to-generate pattern-length model))
 
 (defn build-model-from-lines
   "Builds a model from a bunch of text lines."
