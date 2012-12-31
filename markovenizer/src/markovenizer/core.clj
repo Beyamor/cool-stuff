@@ -64,3 +64,8 @@
       (if (= :end result)
         s
         (recur (str s result))))))
+
+(defn build-strings
+  "Creates some number of strings using the given model."
+  [number-to-generate pattern-length model]
+  (map #(build-string pattern-length model) (range number-to-generate)))
