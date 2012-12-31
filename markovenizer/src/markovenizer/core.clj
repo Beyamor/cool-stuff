@@ -11,19 +11,30 @@
   ([text pattern-length]
    (get-pattern text pattern-length (count text))))
 
+(defn- char-patterns
+  "Generates the patterns which result
+   in a subsequent character."
+  [pattern-length text]
+  (for [result-index (-> text count range)]
+    (let [resulting-char (get text result-index)
+          pattern (get-pattern text pattern-length result-index)]
+      [pattern resulting-char])))
+
+(defn- end-pattern
+  "Generates the pattern ending the text."
+  [pattern-length text]
+  [(get-pattern text pattern-length) :end])
+
 (defn patterns
   "Generates the patterns from a given string.
    Patterns will be of max length pattern-length.
    e.g.,
     (patterns 2 'abc')
-     ; => ['', a], ['a', b], ['ab', c]"
+     ; => ['', a], ['a', b], ['ab', c], ['bc', :end]"
   [pattern-length text]
   (concat
-    (for [result-index (-> text count range)]
-      (let [resulting-char (get text result-index)
-            pattern (get-pattern text pattern-length result-index)]
-        [pattern resulting-char]))
-    [[(get-pattern text pattern-length) :end]]))
+    (char-patterns pattern-length text)
+    [(end-pattern pattern-length text)]))
 
 (defn build-model-from-patterns
   "Given a list of lists of pattern/results,
