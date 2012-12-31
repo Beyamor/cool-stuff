@@ -23,4 +23,8 @@
 
 (deftest can-get-result
          (is (= \d (result-for-pattern "abc" {"abc" [\d]})))
-         (is (#{\d \e} (result-for-pattern "abc" {"abc" [\d \e]}))))
+         (is (#{\d \e} (result-for-pattern "abc" {"abc" [\d \e]})))
+         (is (= :end (result-for-pattern "xyz" {"abc" [\d \e]}))))
+
+(deftest can-build-a-string
+         (is (= "abc" (build-string 1 {"" [\a] "a" [\b] "b" [\c]}))))

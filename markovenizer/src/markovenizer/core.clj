@@ -1,5 +1,16 @@
 (ns markovenizer.core)
 
+(defn- get-pattern
+  "Grabs a pattern from a string.
+   Takes the length of the pattern and
+   the (exclusive) end index of the pattern."
+  ([text pattern-length end-index]
+   (.substring text
+               (max (- end-index pattern-length) 0)
+               end-index))
+  ([text pattern-length]
+   (get-pattern text pattern-length (count text))))
+
 (defn patterns
   "Generates the patterns from a given string.
    Patterns will be of max length pattern-length.
@@ -9,9 +20,7 @@
   [pattern-length text]
   (for [result-index (-> text count range)]
     (let [resulting-char (get text result-index)
-          pattern (.substring text
-                              (max (- result-index pattern-length) 0)
-                              result-index)]
+          pattern (get-pattern text pattern-length result-index)]
       [pattern resulting-char])))
 
 (defn build-model-from-patterns
@@ -29,4 +38,16 @@
   "Given a pattern and a model,
    this grabs a random result for the pattern."
   [pattern model]
-  (rand-nth (model pattern)))
+  (if-let [possible-results (model pattern)]
+    (rand-nth possible-results)
+    :end))
+
+(defn build-string
+  "Builds a string using the given model."
+  [pattern-length model]
+  (loop [s ""]
+    (let [pattern (get-pattern s pattern-length)
+          result (result-for-pattern pattern model)]
+      (if (= :end result)
+        s
+        (recur (str s result))))))
