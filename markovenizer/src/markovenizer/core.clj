@@ -83,3 +83,11 @@
   [pattern-length f]
   (with-open [rdr (reader f)]
     (build-model-from-lines pattern-length (line-seq rdr))))
+
+(defn print-strings
+  "Prints a bunch of strings generated from a model."
+  [number-to-print pattern-length model]
+  (dorun
+    (map-indexed
+      (fn [index string] (println index ": " string))
+      (build-strings number-to-print pattern-length model))))
