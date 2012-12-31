@@ -69,3 +69,9 @@
   "Creates some number of strings using the given model."
   [number-to-generate pattern-length model]
   (map #(build-string pattern-length model) (range number-to-generate)))
+
+(defn build-model-from-lines
+  "Reads a bunch of lines and builds a model from them."
+  [pattern-length lines]
+  (build-model-from-patterns
+    (map (partial patterns pattern-length) lines)))

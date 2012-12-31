@@ -29,3 +29,7 @@
 (deftest can-build-a-string
          (is (= "abc" (build-string 1 {"" [\a] "a" [\b] "b" [\c]})))
          (is (= "abc" (build-string 1 {"" [\a] "a" [\b] "b" [\c] "c" [:end]}))))
+
+(deftest can-build-model-from-lines
+         (is (= {"" [\a \a] "a" [\b \b] "b" [:end \c] "c" [:end]}
+                (build-model-from-lines 1 ["ab" "abc"]))))
