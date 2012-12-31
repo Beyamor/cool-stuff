@@ -3,12 +3,12 @@
   (:use [clojure.test]))
 
 (deftest can-generate-patterns
-         (is (= [["" \a]] (patterns 2 "a")))
-         (is (= [["" \a] ["a" \b]] (patterns 2 "ab")))
-         (is (= [["" \a] ["a" \b] ["ab" \c]] (patterns 2 "abc")))
-         (is (= [["" \a] ["a" \b] ["ab" \c] ["bc" \d]] (patterns 2 "abcd")))
-         (is (= [["" \a] ["a" \b] ["b" \c] ["c" \d]] (patterns 1 "abcd")))
-         (is (= [["" \a] ["a" \b] ["ab" \c] ["abc" \d]] (patterns 3 "abcd"))))
+         (is (= [["" \a] ["a" :end]] (patterns 2 "a")))
+         (is (= [["" \a] ["a" \b] ["ab" :end]] (patterns 2 "ab")))
+         (is (= [["" \a] ["a" \b] ["ab" \c] ["bc" :end]] (patterns 2 "abc")))
+         (is (= [["" \a] ["a" \b] ["ab" \c] ["bc" \d] ["cd" :end]] (patterns 2 "abcd")))
+         (is (= [["" \a] ["a" \b] ["b" \c] ["c" \d] ["d" :end]] (patterns 1 "abcd")))
+         (is (= [["" \a] ["a" \b] ["ab" \c] ["abc" \d] ["bcd" :end]] (patterns 3 "abcd"))))
 
 (deftest can-amalgamate-patterns
          (is (= {"abc" [\d]}
@@ -27,4 +27,5 @@
          (is (= :end (result-for-pattern "xyz" {"abc" [\d \e]}))))
 
 (deftest can-build-a-string
-         (is (= "abc" (build-string 1 {"" [\a] "a" [\b] "b" [\c]}))))
+         (is (= "abc" (build-string 1 {"" [\a] "a" [\b] "b" [\c]})))
+         (is (= "abc" (build-string 1 {"" [\a] "a" [\b] "b" [\c] "c" [:end]}))))

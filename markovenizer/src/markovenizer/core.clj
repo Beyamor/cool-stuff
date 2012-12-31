@@ -18,10 +18,12 @@
     (patterns 2 'abc')
      ; => ['', a], ['a', b], ['ab', c]"
   [pattern-length text]
-  (for [result-index (-> text count range)]
-    (let [resulting-char (get text result-index)
-          pattern (get-pattern text pattern-length result-index)]
-      [pattern resulting-char])))
+  (concat
+    (for [result-index (-> text count range)]
+      (let [resulting-char (get text result-index)
+            pattern (get-pattern text pattern-length result-index)]
+        [pattern resulting-char]))
+    [[(get-pattern text pattern-length) :end]]))
 
 (defn build-model-from-patterns
   "Given a list of lists of pattern/results,
