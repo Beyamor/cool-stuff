@@ -1,4 +1,5 @@
-(ns markovenizer.core)
+(ns markovenizer.core
+  (:use [clojure.java.io :only [reader]]))
 
 (defn- get-pattern
   "Grabs a pattern from a string.
@@ -71,7 +72,14 @@
   (map #(build-string pattern-length model) (range number-to-generate)))
 
 (defn build-model-from-lines
-  "Reads a bunch of lines and builds a model from them."
+  "Builds a model from a bunch of text lines."
   [pattern-length lines]
   (build-model-from-patterns
     (map (partial patterns pattern-length) lines)))
+
+(defn build-model-from-file
+  "Reads line-separated strings from a file
+   and createsa a model based on them."
+  [pattern-length f]
+  (with-open [rdr (reader f)]
+    (build-model-from-lines pattern-length (line-seq rdr))))
