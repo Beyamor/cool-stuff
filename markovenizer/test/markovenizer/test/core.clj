@@ -9,3 +9,14 @@
          (is (= [["" \a] ["a" \b] ["ab" \c] ["bc" \d]] (patterns 2 "abcd")))
          (is (= [["" \a] ["a" \b] ["b" \c] ["c" \d]] (patterns 1 "abcd")))
          (is (= [["" \a] ["a" \b] ["ab" \c] ["abc" \d]] (patterns 3 "abcd"))))
+
+(deftest can-amalgamate-patterns
+         (is (= {"abc" [\d]}
+                (build-model-from-patterns
+                  [[["abc" \d]]])))
+         (is (= {"abc" [\d \e]}
+                (build-model-from-patterns
+                  [[["abc" \d]] [["abc" \e]]])))
+         (is (= {"abc" [\d \e] "xyz" [\w]}
+                (build-model-from-patterns
+                  [[["abc" \d] ["xyz" \w]] [["abc" \e]]]))))
