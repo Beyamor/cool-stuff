@@ -2,5 +2,5 @@
   (:use [markovenizer.core])
   (:use [clojure.test]))
 
-(deftest replace-me ;; FIXME: write
-  (is false "No tests have been written."))
+(deftest can-generate-patterns
+         (is (= [[[] \a]] (patterns 2 "a"))))
