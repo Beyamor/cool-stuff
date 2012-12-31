@@ -69,7 +69,7 @@
 (defn build-strings
   "Creates some number of strings using the given model."
   [number-to-generate pattern-length model]
-  (map #(build-string pattern-length model) (range number-to-generate)))
+  (take number-to-generate (repeatedly #(build-string pattern-length model))))
 
 (defn build-model-from-lines
   "Builds a model from a bunch of text lines."
@@ -89,5 +89,12 @@
   [number-to-print pattern-length model]
   (dorun
     (map-indexed
-      (fn [index string] (println index ": " string))
+      (fn [index string] (println (str index ": " string)))
       (build-strings number-to-print pattern-length model))))
+
+(defn -main
+  [input-file & args]
+  (let [pattern-length 3
+        number-to-print 20
+        model (build-model-from-file pattern-length input-file)]
+    (print-strings number-to-print pattern-length model)))
