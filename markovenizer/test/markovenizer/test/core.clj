@@ -20,3 +20,7 @@
          (is (= {"abc" [\d \e] "xyz" [\w]}
                 (build-model-from-patterns
                   [[["abc" \d] ["xyz" \w]] [["abc" \e]]]))))
+
+(deftest can-get-result
+         (is (= \d (result-for-pattern "abc" {"abc" [\d]})))
+         (is (#{\d \e} (result-for-pattern "abc" {"abc" [\d \e]}))))

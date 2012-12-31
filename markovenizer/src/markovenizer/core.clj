@@ -24,3 +24,9 @@
     (reduce
       (partial merge-with into)
       patterns)))
+
+(defn result-for-pattern
+  "Given a pattern and a model,
+   this grabs a random result for the pattern."
+  [pattern model]
+  (rand-nth (model pattern)))
