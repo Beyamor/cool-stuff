@@ -68,10 +68,10 @@
 
 (defn- build-filtered-strings
   "Creates some number of strings using the given model,
-   filtering the strings with the provided predicate function."
-  [predicate number-to-generate pattern-length model]
+   filtering the strings with the provided selector function."
+  [selector number-to-generate pattern-length model]
   (take number-to-generate
-        (filter predicate (repeatedly #(build-string pattern-length model)))))
+        (filter selector (repeatedly #(build-string pattern-length model)))))
 
 (defn build-strings
   "Creates some number of strings using the given model."
