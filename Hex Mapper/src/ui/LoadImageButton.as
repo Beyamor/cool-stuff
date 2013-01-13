@@ -8,6 +8,7 @@ package ui
 	import flash.net.FileFilter;
 	import flash.net.FileReference;
 	import flash.utils.ByteArray;
+	import net.flashpunk.Entity;
 	import net.flashpunk.graphics.Image;
 	/**
 	 * ...
@@ -51,11 +52,10 @@ package ui
 		
 		private function imageBytesRead(event:Event):void {
 			
-			var loaderInfo:LoaderInfo = event.target as LoaderInfo;
+			var loaderInfo:LoaderInfo = event.target as LoaderInfo;			
+			var bitmapData:BitmapData = ((event.target as LoaderInfo).content as Bitmap).bitmapData;
 			
-			var bitmapData:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.height);
-			
-			trace(bitmapData.width + ", " + bitmapData.height);
+			world.add(new Entity(0, 0, new Image(bitmapData)));
 		}
 	}
 
