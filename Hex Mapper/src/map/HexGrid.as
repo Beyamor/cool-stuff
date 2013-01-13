@@ -57,17 +57,19 @@ package map
 			//   -------
 			//  /       \         /
 			// /         \       /
-			//   |- 2r -| -------
+			//            -------
 			// \         /       \
 			//  \       /         \
-			//   -------  |- 2r -|
+			//   -------   
 			//  /       \         /
 			// /         \       /
 			//
 			// We need to add the hex widths, but remove the overlap. Cool?
 			// So, we're looking at something like:
 			// (widthInPixels / (2r - ½r)) * 2
-			_width = 2 * Math.floor(widthInPixels / (1.5 * hexRadius));
+			var horizontalOverlap:Number = 0.5 * hexRadius;
+			
+			_width = 2 * Math.floor(widthInPixels / (2 * hexRadius - horizontalOverlap));
 			
 			// Height is simpler. stack dem hexes.
 			// Something like:
@@ -97,16 +99,16 @@ package map
 					// even columns
 					if (tileX % 2 == 0) {
 						
-						x = tileX * Math.sqrt(3) * hexRadius;
-						y = tileY * (3 * hexRadius);
+						x = (tileX/2) * (2 * hexRadius + (2 * hexRadius - 2 * horizontalOverlap));
+						y = (tileY/2) * (Math.sqrt(3) * hexRadius);
 						_tiles[tileX][tileY] = new HexTile(x, y, hexRadius);
 					}
 					
 					// odd columns
 					else {
 						
-						x = 2 * hexRadius + tileX * Math.sqrt(3) * hexRadius;
-						y = 0.5 * Math.sqrt(3) * hexRadius + tileY * (3 * hexRadius);
+						x = Math.floor(tileX / 2) * (2 * hexRadius + (2 * hexRadius - 2 * horizontalOverlap)) + (2 * hexRadius - horizontalOverlap);
+						y = Math.floor(tileY / 2) * (Math.sqrt(3) * hexRadius) + (0.5 * Math.sqrt(3) * hexRadius);
 						_tiles[tileX][tileY] = new HexTile(x, y, hexRadius);
 					}
 				}				
