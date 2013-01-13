@@ -1,5 +1,6 @@
 package worlds 
 {
+	import flash.display.BitmapData;
 	import net.flashpunk.World;
 	import ui.LoadImageButton;
 	import values.Game;
@@ -24,6 +25,11 @@ package worlds
 			loadButton.x = Game.WIDTH - loadButton.width - 10;
 			loadButton.y = Game.HEIGHT - loadButton.height - 10;
 			add(loadButton);
+		}
+		
+		public function loadMap(mapBitmapData:BitmapData):void {
+			
+			// Uhhhhh
 		}
 	}
 

@@ -10,6 +10,7 @@ package ui
 	import flash.utils.ByteArray;
 	import net.flashpunk.Entity;
 	import net.flashpunk.graphics.Image;
+	import worlds.Overworld;
 	/**
 	 * ...
 	 * @author beyamor
@@ -55,7 +56,7 @@ package ui
 			var loaderInfo:LoaderInfo = event.target as LoaderInfo;
 			var bitmapData:BitmapData = (loaderInfo.content as Bitmap).bitmapData;
 			
-			world.add(new Entity(0, 0, new Image(bitmapData)));
+			if (world && world is Overworld) (world as Overworld).loadMap(bitmapData);
 		}
 	}
 
