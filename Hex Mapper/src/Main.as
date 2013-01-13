@@ -17,6 +17,8 @@ package
 		public function Main():void 
 		{
 			super(Game.WIDTH, Game.HEIGHT);
+			
+			FP.screen.color = 0x666666;
 		}
 		
 		override public function init():void 

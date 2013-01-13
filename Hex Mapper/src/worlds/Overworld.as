@@ -1,6 +1,7 @@
 package worlds 
 {
 	import flash.display.BitmapData;
+	import map.HexTile;
 	import net.flashpunk.World;
 	import ui.LoadImageButton;
 	import values.Game;
@@ -29,7 +30,7 @@ package worlds
 		
 		public function loadMap(mapBitmapData:BitmapData):void {
 			
-			// Uhhhhh
+			add(new HexTile(300, 200, 64));
 		}
 	}
 
