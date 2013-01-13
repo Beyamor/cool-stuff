@@ -52,8 +52,8 @@ package ui
 		
 		private function imageBytesRead(event:Event):void {
 			
-			var loaderInfo:LoaderInfo = event.target as LoaderInfo;			
-			var bitmapData:BitmapData = ((event.target as LoaderInfo).content as Bitmap).bitmapData;
+			var loaderInfo:LoaderInfo = event.target as LoaderInfo;
+			var bitmapData:BitmapData = (loaderInfo.content as Bitmap).bitmapData;
 			
 			world.add(new Entity(0, 0, new Image(bitmapData)));
 		}
