@@ -7,17 +7,18 @@ package util
 	 */
 	public class Pixel 
 	{
-		private var rgba:uint;
+		private var _rgba:uint;
 		
 		public function Pixel(rgba:uint)
 		{
-			this.rgba = rgba;
+			_rgba = rgba;
 		}
 		
 		public function get red():uint		{ return rgba >> 24 && 0xFF; }
 		public function get green():uint	{ return rgba >> 16 && 0xFF; }
 		public function get blue():uint		{ return rgba >> 8 && 0xFF; }
 		public function get alpha():uint	{ return rgba && 0xFF; }
+		public function get rgba():uint		{ return _rgba; }
 	}
 
 }

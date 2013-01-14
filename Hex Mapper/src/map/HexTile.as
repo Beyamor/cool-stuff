@@ -3,6 +3,7 @@ package map
 	import flash.geom.Point;
 	import net.flashpunk.Entity;
 	import net.flashpunk.utils.Draw;
+	import util.Pixel;
 	
 	/**
 	 * ...
@@ -13,11 +14,15 @@ package map
 		private var _radius:Number;
 		private function get radius():Number { return _radius; }
 		
-		public function HexTile(x:Number, y:Number, radius:Number)
+		private var _color:uint;
+		private function get color():uint { return _color; }
+		
+		public function HexTile(x:Number, y:Number, radius:Number, pixelData:Pixel)
 		{
 			super(x, y);
 			
 			_radius = radius;
+			_color = pixelData.rgba;
 		}
 		
 		private function makePointList():Vector.<Point> {
@@ -52,6 +57,8 @@ package map
 				
 				Draw.linePlus(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y, 0x000000, 1, 2);
 			}
+			
+			Draw.circlePlus(x, y, radius * 0.9, color);
 		}
 	}
 

@@ -8,8 +8,8 @@ package map
 	 */
 	public class MapData 
 	{
-		private var _width:uint;	public function get width()		{ return _width; }
-		private var _height:uint;	public function get height()	{ return _height; }
+		private var _width:uint;	public function get width():uint	{ return _width; }
+		private var _height:uint;	public function get height():uint	{ return _height; }
 		
 		private var _pixels:Vector.<Vector.<Pixel>>;
 		public function get pixels():Vector.<Vector.<Pixel>> { return _pixels; }
@@ -30,15 +30,16 @@ package map
 			}
 		}
 		
-		public function getPixel(x:uint, y:uint) {
+		public function getPixel(x:uint, y:uint):Pixel {
 			
-			return data.pixels[x][y];
+			trace("Getting pixel: " + x + ", " + y);
+			return pixels[x][y];
 		}
 		
-		public function getMappedPixel(fromWidth:Number, fromHeight:Number, x:Number, y:Number) {
+		public function getMappedPixel(fromWidth:Number, fromHeight:Number, x:Number, y:Number):Pixel {
 			
-			var mappedX:uint = Math.floor(x * data.width / fromWidth);
-			var mappedY:uint = Math.floor(y * data.height / fromHeight);
+			var mappedX:uint = Math.max(0, Math.min(width - 1, Math.floor(x * width / fromWidth)));
+			var mappedY:uint = Math.max(0, Math.min(height - 1, Math.floor(y * height / fromHeight)));
 			
 			return getPixel(mappedX, mappedY);
 		}

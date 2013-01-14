@@ -15,7 +15,7 @@ package map
 		private var _width:uint;	private function get width():uint { return _width; }
 		private var _height:uint;	private function get height():uint { return _height; }
 		
-		public function HexGrid(widthInPixels:uint, heightInPixels:uint, hexRadius:Number)
+		public function HexGrid(widthInPixels:uint, heightInPixels:uint, hexRadius:Number, mapData:MapData)
 		{
 			var tileX:uint, tileY:uint, tile:HexTile, x:Number, y:Number;
 			
@@ -90,11 +90,10 @@ package map
 			const verticalHeight:Number = Math.sqrt(3) * hexRadius;
 			
 			// The width then is how many interleaved distances can fit in the space
-			// times two for the sparse array
-			_width = Math.ceil(widthInPixels / interleavedHorizontalDistance) * 2;
+			_width = Math.ceil(widthInPixels / interleavedHorizontalDistance);
 			
 			// The height is how many heights can fit in the space,
-			// again times two for the sparse array
+			// times two for the sparse array
 			_height = Math.ceil(heightInPixels / verticalHeight) * 2;
 			
 			// Neato. Start us off with an empty array for simplicity.
@@ -122,8 +121,7 @@ package map
 					if (tileX % 2 == 0) {
 						
 						x = (tileX/2) * horizontalDistance;
-						y = (tileY/2) * verticalHeight;
-						_tiles[tileX][tileY] = new HexTile(x, y, hexRadius);
+						y = (tileY/2) * verticalHeight;						
 					}
 					
 					// odd columns
@@ -131,8 +129,13 @@ package map
 						
 						x = Math.floor(tileX / 2) * horizontalDistance + interleavedHorizontalDistance;
 						y = Math.floor(tileY / 2) * verticalHeight + verticalHeight/2;
-						_tiles[tileX][tileY] = new HexTile(x, y, hexRadius);
 					}
+					
+					_tiles[tileX][tileY] = new HexTile(
+											x,
+											y,
+											hexRadius,
+											mapData.getMappedPixel(widthInPixels, heightInPixels, x, y));
 				}				
 			}
 		}
