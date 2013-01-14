@@ -37,7 +37,7 @@ package map
 			//			"7" is to the lower-left
 			//			and "8" is to the lower-right
 			
-			// Remember this triangle:
+			// Remember this triangle becase it's going to come in handy.
 			//       |\
 			//       | \
 			//       |30\
@@ -49,32 +49,53 @@ package map
 			//       ----------
 			//          ½r
 			
-			// Given a width in pixels, we want to fill it with hexes.
-			// To do that, we first figure out the cardinality of our array.
-			// The width, I think, is given by laying hexes end-to-end and
-			// subtracting the intersect. So, with hexes stacked like this:
+			//Okay. Let's name a few values here.
+			
+			// An important propery when looking at horizontal texes is the overlap.
+			// So, with hexes stacked like this:
 			//  
 			//   -------
 			//  /       \         /
 			// /         \       /
-			//            -------
+			//   |- 2r -| -------
 			// \         /       \
 			//  \       /         \
-			//   -------   
+			//   -------  |- 2r -|
 			//  /       \         /
 			// /         \       /
 			//
-			// We need to add the hex widths, but remove the overlap. Cool?
-			// So, we're looking at something like:
-			// (widthInPixels / (2r - ½r)) * 2
-			var horizontalOverlap:Number = 0.5 * hexRadius;
+			// The hexes have overlapping x values.
+			// We can get this value from our handy triangle.
+			const horizontalOverlap:Number = 0.5 * hexRadius;
 			
-			_width = 2 * Math.floor(widthInPixels / (2 * hexRadius - horizontalOverlap));
+			// We can also look at horizontal distance between the centers
+			// of hexes. This has two meanings. The first is the "interleaved"
+			// distance - the horizontal distance btween two diagonally adjacent
+			// hexes.
+			const interleavedHorizontalDistance:Number = 2 * hexRadius - horizontalOverlap;
 			
-			// Height is simpler. stack dem hexes.
-			// Something like:
-			// (heightInPixels / (2 * ½√3*r)) * 2
-			_height = 2 * Math.floor(heightInPixels / (Math.sqrt(3) * hexRadius));
+			// The second is the horizontal distance between two hexes in the same row.
+			// e.g, the distance between A and B
+			//   -------           -------
+			//  /       \         /        \
+			// /         \       /          \
+			//      A     -------      B
+			// \         /       \          /
+			//  \       /         \        /
+			//   -------            -------
+			const horizontalDistance:Number = 2 * hexRadius + (2 * hexRadius - 2 * horizontalOverlap);
+			
+			// Also nice to have is the vertical height of a hex.
+			// i.e., ½√3*r * 2
+			const verticalHeight:Number = Math.sqrt(3) * hexRadius;
+			
+			// The width then is how many interleaved distances can fit in the space
+			// times two for the sparse array
+			_width = Math.ceil(widthInPixels / interleavedHorizontalDistance) * 2;
+			
+			// The height is how many heights can fit in the space,
+			// again times two for the sparse array
+			_height = Math.ceil(heightInPixels / verticalHeight) * 2;
 			
 			// Neato. Start us off with an empty array for simplicity.
 			_tiles = new Vector.<Vector.<HexTile>>;
@@ -91,6 +112,7 @@ package map
 			// In even columns (0, 2, etc.), we're dealing with even rows (0, 2, etc.)
 			// In odd columns (1, 3, etc.), we're dealing with odd columns (1, 3, etc.)
 			// So, when we actually add a hex, we need to treat the two column types differently.
+			// I ain't even gunna justify the math tho. Draw it out.
 			for (tileX = 0; tileX < width; ++tileX) {
 				for (tileY = 0; tileY < height; ++tileY) {
 					
@@ -99,16 +121,16 @@ package map
 					// even columns
 					if (tileX % 2 == 0) {
 						
-						x = (tileX/2) * (2 * hexRadius + (2 * hexRadius - 2 * horizontalOverlap));
-						y = (tileY/2) * (Math.sqrt(3) * hexRadius);
+						x = (tileX/2) * horizontalDistance;
+						y = (tileY/2) * verticalHeight;
 						_tiles[tileX][tileY] = new HexTile(x, y, hexRadius);
 					}
 					
 					// odd columns
 					else {
 						
-						x = Math.floor(tileX / 2) * (2 * hexRadius + (2 * hexRadius - 2 * horizontalOverlap)) + (2 * hexRadius - horizontalOverlap);
-						y = Math.floor(tileY / 2) * (Math.sqrt(3) * hexRadius) + (0.5 * Math.sqrt(3) * hexRadius);
+						x = Math.floor(tileX / 2) * horizontalDistance + interleavedHorizontalDistance;
+						y = Math.floor(tileY / 2) * verticalHeight + verticalHeight/2;
 						_tiles[tileX][tileY] = new HexTile(x, y, hexRadius);
 					}
 				}				
