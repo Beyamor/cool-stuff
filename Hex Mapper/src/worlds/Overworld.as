@@ -17,6 +17,7 @@ package worlds
 	 */
 	public class Overworld extends World 
 	{
+		private var hexGrid:HexGrid = null;
 		
 		public function Overworld() 
 		{
@@ -32,9 +33,7 @@ package worlds
 			Input.define("right", Key.D, Key.RIGHT);
 			Input.define("left", Key.A, Key.LEFT);
 			
-			var loadButton:LoadImageButton = new LoadImageButton(0, 0);
-			loadButton.x = Game.WIDTH - loadButton.width - 10;
-			loadButton.y = Game.HEIGHT - loadButton.height - 10;
+			var loadButton:LoadImageButton = new LoadImageButton();
 			add(loadButton);
 		}
 		
@@ -50,9 +49,11 @@ package worlds
 		
 		public function loadMap(mapBitmapData:BitmapData):void {
 			
-			var grid:HexGrid = new HexGrid(Game.WORLD_WIDTH, Game.WORLD_HEIGHT, Game.TILE_RADIUS, new MapData(mapBitmapData));
+			if (hexGrid) hexGrid.removeFromWorld();
 			
-			grid.addToWorld(this);
+			hexGrid = new HexGrid(Game.WORLD_WIDTH, Game.WORLD_HEIGHT, Game.TILE_RADIUS, new MapData(mapBitmapData));
+			
+			hexGrid.addToWorld(this);
 		}
 	}
 

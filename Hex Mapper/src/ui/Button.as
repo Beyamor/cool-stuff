@@ -122,7 +122,7 @@ package ui
 		private function onMouseUp(e:MouseEvent=null):void
 		{
 			if(!shouldCall || !Input.mouseReleased || (callback == null)) return;
-			if(collidePoint(x, y, Input.mouseX, Input.mouseY)) callback();
+			if(collidePoint(x - FP.camera.x, y - FP.camera.y, Input.mouseX, Input.mouseY)) callback();
 		}
 		
 		/** 
