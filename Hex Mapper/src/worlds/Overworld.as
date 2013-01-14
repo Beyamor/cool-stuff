@@ -50,7 +50,7 @@ package worlds
 		
 		public function loadMap(mapBitmapData:BitmapData):void {
 			
-			var grid:HexGrid = new HexGrid(800, 600, 32, new MapData(mapBitmapData));
+			var grid:HexGrid = new HexGrid(Game.WORLD_WIDTH, Game.WORLD_HEIGHT, Game.TILE_RADIUS, new MapData(mapBitmapData));
 			
 			grid.addToWorld(this);
 		}

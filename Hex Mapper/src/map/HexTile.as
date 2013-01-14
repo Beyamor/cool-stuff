@@ -4,6 +4,7 @@ package map
 	import net.flashpunk.Entity;
 	import net.flashpunk.utils.Draw;
 	import util.Pixel;
+	import net.flashpunk.FP;
 	
 	/**
 	 * ...
@@ -17,39 +18,42 @@ package map
 		private var _color:uint;
 		private function get color():uint { return _color; }
 		
+		private var _points:Vector.<Point>;
+		private function get points():Vector.<Point> { return _points; }
+		
 		public function HexTile(x:Number, y:Number, radius:Number, pixelData:Pixel)
 		{
 			super(x, y);
 			
 			_radius = radius;
 			_color = pixelData.rgba;
+			
+			makePointList();
 		}
 		
-		private function makePointList():Vector.<Point> {
+		private function makePointList():void {
 			
 			var theta:Number;
-			var points:Vector.<Point> = new Vector.<Point>;
+			_points = new Vector.<Point>;
 			
 			for (var pointIndex:uint = 0; pointIndex < 6; ++pointIndex) {
 				
 				theta = pointIndex * (Math.PI * 2 / 6);
 				
-				points.push(new Point(
+				_points.push(new Point(
 							x + radius * Math.cos(theta),
 							y + radius * Math.sin(theta)));
 			}
-			
-			return points;
 		}
 		
 		override public function render():void 
 		{
+			if (!collideRect(x, y, FP.camera.x - radius, FP.camera.y - radius, FP.width + 2 * radius, FP.height + 2 * radius)) return;
+			
 			var firstPoint:Point;
 			var secondPoint:Point;
 			var pointIndex:uint;
-			
-			var points:Vector.<Point> = makePointList();
-			
+						
 			for (pointIndex = 0; pointIndex < points.length; ++pointIndex) {
 								
 				firstPoint = points[pointIndex];
@@ -58,7 +62,7 @@ package map
 				Draw.linePlus(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y, 0x000000, 1, 2);
 			}
 			
-			Draw.circlePlus(x, y, radius * 0.9, color);
+			Draw.circlePlus(x, y, radius * 0.8, color);
 		}
 	}
 

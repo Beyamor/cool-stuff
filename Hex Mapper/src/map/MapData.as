@@ -32,7 +32,6 @@ package map
 		
 		public function getPixel(x:uint, y:uint):Pixel {
 			
-			trace("Getting pixel: " + x + ", " + y);
 			return pixels[x][y];
 		}
 		
