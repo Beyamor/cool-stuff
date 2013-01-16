@@ -38,15 +38,15 @@
         (fn [[state-name state-spec]]
           (let [state-action (get-state-action state-spec)
                 state-transitions (get-state-transitions state-name state-spec state-table)
-                state [state-action state-transitions]]
+                state {:action state-action, :transition state-transitions}]
             (swap! state-table assoc state-name state)))
         state-specs))
     (@state-table initial-state-name)))
 
 (defn act
-  [[act-fn _] & args]
-  (apply act-fn args))
+  [{:keys [action]} & args]
+  (apply action args))
 
 (defn transition
-  [[_ transition-fn] & args]
-  (apply transition-fn args))
+  [{:keys [transition]} & args]
+  (apply transition args))
