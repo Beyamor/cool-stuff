@@ -23,3 +23,17 @@
        fsm-state (transition fsm-state)
        res3 (act fsm-state)]
    (is (= [:a :b :a] [res1 res2 res3]))))
+
+(deftest can-create-a-cyclic-state-machine
+ (let [fsm-state (fsm
+                   {:initial :a
+                    :states {:a {:action (constantly :a)
+                                 :next-state :b}
+                             :b {:action (constantly :b)
+                                 :next-state :a}}})
+       res1 (act fsm-state)
+       fsm-state (transition fsm-state)
+       res2 (act fsm-state)
+       fsm-state (transition fsm-state)
+       res3 (act fsm-state)]
+   (is (= [:a :b :a] [res1 res2 res3]))))

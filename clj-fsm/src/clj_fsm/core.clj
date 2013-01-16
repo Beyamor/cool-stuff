@@ -4,16 +4,29 @@
   [{:keys [action]}]
   action)
 
-(defn- get-state-transitions
-  [{:keys [transitions]} state-table]
+(defn- get-transitions-fn
+  [{:keys [transitions]}]
+  {:pre [(not (nil? transitions))]}
   (fn [& args]
-    (let [next-state-names (map
-                             (fn [[next-state-name transition-predicate]]
-                               (if (apply transition-predicate args)
-                                 next-state-name))
-                             transitions)
-          next-state-name (->> next-state-names (filter identity) first)]
-      (@state-table next-state-name))))
+    {:post [(not (nil? %))]}
+    (some
+      (fn [[next-state transition-predicate]]
+        (if (apply transition-predicate args) next-state))
+      transitions)))
+
+(defn- get-next-state-fn
+  [state-name state-spec]
+  (cond
+    (contains? state-spec :next-state) (constantly (state-spec :next-state))
+    (contains? state-spec :transitions) (get-transitions-fn state-spec)
+    :else (constantly state-name)))
+
+(defn- get-state-transitions
+  [state-name state-spec state-table]
+  (let [next-state-fn (get-next-state-fn state-name state-spec)]
+    (fn [& args]
+      {:post [(not (nil? %))]}
+      (@state-table (apply next-state-fn args)))))
 
 (defn fsm
   [spec]
@@ -24,7 +37,7 @@
       (map
         (fn [[state-name state-spec]]
           (let [state-action (get-state-action state-spec)
-                state-transitions (get-state-transitions state-spec state-table)
+                state-transitions (get-state-transitions state-name state-spec state-table)
                 state [state-action state-transitions]]
             (swap! state-table assoc state-name state)))
         state-specs))
