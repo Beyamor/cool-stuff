@@ -7,10 +7,9 @@
 (defn- get-state-transitions
   [{:keys [transitions]} state-table]
   (fn [& args]
-    (let [_ (dorun (map #(->> % (str "transition: ") println) transitions))
-          next-state-names (map
-                             (fn [[next-state-name transition-predicates]]
-                               (if (some #(apply % args) transition-predicates)
+    (let [next-state-names (map
+                             (fn [[next-state-name transition-predicate]]
+                               (if (apply transition-predicate args)
                                  next-state-name))
                              transitions)
           next-state-name (->> next-state-names (filter identity) first)]
