@@ -24,7 +24,7 @@
        res3 (act fsm-state)]
    (is (= [:a :b :a] [res1 res2 res3]))))
 
-(deftest can-create-a-cyclic-state-machine
+(deftest can-specify-next-state-directly
  (let [fsm-state (fsm
                    {:initial :a
                     :states {:a {:action (constantly :a)
