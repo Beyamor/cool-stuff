@@ -1,12 +1,12 @@
 (ns clj-fsm.core)
 
-(defmulti machine-property (fn [table property data] property))
-(defmulti state-property (fn [table property data] property))
+(defmulti machine-property (fn [read-table property data] property))
+(defmulti state-property (fn [read-table property data] property))
 
-(defn add-to-state
-  [table state data]
-  {:pre [(map? data)]}
-  (swap! table update-in [state] merge data))
+(defn add-state-data
+  [table additional-state-data]
+  {:pre [(map? additional-state-data)]}
+  (swap! table #(merge-with merge % additional-state-data)))
 
 (defn initial-state
   [table]
@@ -19,45 +19,52 @@
     (filter identity)
     first))
 
+(defn make-read-fn
+  [a]
+  (fn [] @a))
+
 (defn fsm
   [machine-spec]
-  (let [table (atom {})]
-    (dorun (map (fn [[property data]] (machine-property table property data)) machine-spec))
+  (let [table (atom {})
+        read-table (make-read-fn table)]
+    (dorun (map
+             (fn [[property data]]
+               (add-state-data table (machine-property read-table property data)))
+             machine-spec))
     (initial-state @table)))
 
 (defmethod machine-property
   :initial
-  [table _ initial-state]
-  (add-to-state table initial-state {:initial true}))
+  [read-table _ initial-state]
+  {initial-state {:initial true}})
 
-(defn- state-data
-  [table state-spec]
+(defn- read-state-data
+  [read-table state-spec]
   (reduce
     merge {}
     (map
       (fn [[property data]]
-        (state-property table property data))
+        (state-property read-table property data))
       state-spec)))
 
 (defmethod machine-property
   :states
-  [table _ state-specs]
-  (dorun
-    (map
-      (fn [[state state-spec]]
-        (add-to-state
-          table state (state-data table state-spec)))
-      state-specs)))
+  [read-table _ state-specs]
+  (into {}
+        (map
+          (fn [[state-name state-spec]]
+            [state-name (read-state-data read-table state-spec)])
+          state-specs)))
 
 (defmethod state-property
   :action
-  [table _ action]
+  [read-table _ action]
   {:action action})
 
 (defmethod state-property
   :next-state
-  [table _ next-state]
-  {:transition (fn [& _] (@table next-state))})
+  [read-table _ next-state]
+  {:transition (fn [& _] (get (read-table) next-state))})
 
 (defn- next-state-fn
   [transitions]
@@ -70,9 +77,9 @@
 
 (defmethod state-property
   :transitions
-  [table _ transitions]
+  [read-table _ transitions]
   {:transition (fn [& args]
-                 (@table (apply (next-state-fn transitions) args)))})
+                 (get (read-table) (apply (next-state-fn transitions) args)))})
 
 (defn act
   [state & args]

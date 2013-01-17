@@ -2,23 +2,6 @@
   (:use [clj-fsm.core])
   (:use [clojure.test]))
 
-(deftest can-set-machine-properties
-         (let [table (atom {})
-               _ (add-to-state table :state {:key :value})
-               _ (machine-property table :initial :state)]
-           (is (= {:key :value, :initial true} (initial-state @table))))) 
-
-(deftest can-set-machine-states
-         (let [table (atom {})
-               _ (machine-property table :states {:state {:action :result}})]
-           (is (= {:state {:action :result}} @table))))
-
-(deftest can-use-state-actions
-         (let [table (atom {})
-               _ (machine-property table :states {:state {:action (constantly :result)}})
-               state (:state @table)]
-           (is (= :result (act state)))))
-
 (deftest can-create-single-state-machine
   (let [fsm-state (fsm
                     {:initial :only-state
