@@ -106,14 +106,16 @@
   {:transition (fn [& args]
                  (get (read-table) (apply (next-state-fn transitions) args)))})
 
-(defn act
-  "Calls the action function of the current state"
-  [state & args]
-  {:pre [(:action state)]}
-  (apply (state :action) args))
+(defn state-fn
+  "Calls a function of the state"
+  [attr state & args]
+  {:pre [(get state attr)]}
+  (apply (get state attr) args))
 
-(defn transition
-  "Calls the transition function of the current state"
-  [state & args]
-  {:pre [(:transition state)]}
-  (apply (state :transition) args))
+(defn- make-state-fn
+  "Creates a function acting on a state"
+  [attr]
+  (partial state-fn attr))
+
+(def act (make-state-fn :action))
+(def transition (make-state-fn :transition))
