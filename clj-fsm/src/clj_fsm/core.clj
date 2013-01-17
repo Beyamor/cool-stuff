@@ -38,10 +38,13 @@
   [read-table _ initial-state]
   {initial-state {:initial true}})
 
+(defn- unify-maps
+  [maps]
+  (apply merge {} maps))
+
 (defn- read-state-data
   [read-table state-spec]
-  (reduce
-    merge {}
+  (unify-maps
     (map
       (fn [[property data]]
         (state-property read-table property data))
@@ -50,11 +53,11 @@
 (defmethod machine-property
   :states
   [read-table _ state-specs]
-  (into {}
-        (map
-          (fn [[state-name state-spec]]
-            [state-name (read-state-data read-table state-spec)])
-          state-specs)))
+  (unify-maps
+    (map
+      (fn [[state-name state-spec]]
+        {state-name (read-state-data read-table state-spec)})
+      state-specs)))
 
 (defmethod state-property
   :action
