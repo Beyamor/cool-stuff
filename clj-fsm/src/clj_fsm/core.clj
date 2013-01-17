@@ -29,16 +29,23 @@
   [a]
   (fn [] @a))
 
+(defn- table-content
+  "Given a function to read table data,
+   this returns the map resulting from
+   handling all of the machine's properties."
+  [read-table machine-spec]
+  (apply merge-with merge
+         (map (fn [[property data]]
+                (machine-property read-table property data))
+              machine-spec)))
+
 (defn fsm
   "Creates a state machine from a machine spec,
    returning the initial state of the machine"
   [machine-spec]
   (let [table (atom {})
         read-table (make-read-fn table)]
-    (dorun (map
-             (fn [[property data]]
-               (add-state-data table (machine-property read-table property data)))
-             machine-spec))
+    (reset! table (table-content read-table machine-spec))
     (initial-state @table)))
 
 (defmethod machine-property
