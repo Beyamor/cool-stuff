@@ -8,6 +8,7 @@ package worlds
 	import net.flashpunk.World;
 	import net.flashpunk.utils.Input;
 	import net.flashpunk.utils.Key;
+	import transitions.transitions.FadeInAndOut;
 	import transitions.TransitionWorld;
 	
 	/**
@@ -45,7 +46,7 @@ package worlds
 		{
 			super.update();
 			
-			if (Input.pressed("transition")) FP.world = new TransitionWorld(this, new GameWorld(), 0.25);
+			if (Input.pressed("transition")) FP.world = new TransitionWorld(this, new GameWorld(), 0.25, new FadeInAndOut);
 		}
 	}
 

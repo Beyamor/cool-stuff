@@ -1,5 +1,6 @@
 package transitions 
 {
+	import net.flashpunk.Entity;
 	import net.flashpunk.FP;
 	import net.flashpunk.World;
 	import util.Timer;
@@ -15,11 +16,27 @@ package transitions
 		
 		private var _transitionTimer:Timer;		private function get timer():Timer { return _transitionTimer; }
 		
-		public function TransitionWorld(from:World, to:World, timeInSeconds:Number)
+		public function TransitionWorld(from:World, to:World, timeInSeconds:Number, effect:Transitioner=null)
 		{
 			_toWorld = to;
 			_fromWorld = from;
 			_transitionTimer = new Timer(timeInSeconds);
+			
+			if (effect) {
+				
+				var fromEntities:Vector.<Entity> = new Vector.<Entity>;
+				_fromWorld.getAll(fromEntities);
+				
+				var toEntities:Vector.<Entity> = new Vector.<Entity>;
+				_toWorld.getAll(toEntities);
+				
+				effect.fromEntities = fromEntities;
+				effect.toEntities = toEntities;
+				effect.transitionTimer = timer;
+				
+				effect.init();
+				add(effect);
+			}
 		}
 		
 		override public function update():void 

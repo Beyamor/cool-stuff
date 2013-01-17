@@ -1,6 +1,7 @@
 package transitions 
 {
 	import net.flashpunk.Entity;
+	import util.Timer;
 	
 	/**
 	 * ...
@@ -8,9 +9,12 @@ package transitions
 	 */
 	public class Transitioner extends Entity 
 	{
+		public var fromEntities:Vector.<Entity>;
+		public var toEntities:Vector.<Entity>;
+		public var transitionTimer:Timer;
 		
-		public function Transitioner(fromEntities:Vector.<Entity>, toEntities:Vector.<Entity>)
-		{
+		public function init():void {
+			
 			var entity:Entity;
 			
 			for each (entity in fromEntities) {
