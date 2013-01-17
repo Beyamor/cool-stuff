@@ -11,7 +11,7 @@ package values
 		
 		public static const WORLD_WIDTH:uint	= 5000;
 		public static const WORLD_HEIGHT:uint	= 5000;
-		public static const TILE_RADIUS:Number	= 32;
+		public static const TILE_RADIUS:Number	= 80;
 		
 		public static const CAMERA_SPEED:Number = 10;
 	}
