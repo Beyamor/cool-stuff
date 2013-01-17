@@ -46,7 +46,7 @@ package worlds
 		{
 			super.update();
 			
-			if (Input.pressed("transition")) FP.world = new TransitionWorld(this, new GameWorld(), 0.25, new FadeInAndOut);
+			if (Input.pressed("transition")) FP.world = new TransitionWorld(this, new GameWorld(), 1, new FadeInAndOut);
 		}
 	}
 

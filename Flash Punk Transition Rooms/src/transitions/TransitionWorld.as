@@ -24,17 +24,7 @@ package transitions
 			
 			if (effect) {
 				
-				var fromEntities:Vector.<Entity> = new Vector.<Entity>;
-				_fromWorld.getAll(fromEntities);
-				
-				var toEntities:Vector.<Entity> = new Vector.<Entity>;
-				_toWorld.getAll(toEntities);
-				
-				effect.fromEntities = fromEntities;
-				effect.toEntities = toEntities;
 				effect.transitionTimer = timer;
-				
-				effect.init();
 				add(effect);
 			}
 		}
@@ -47,6 +37,21 @@ package transitions
 			
 			timer.update();			
 			if (timer.hasFired()) FP.world = toWorld;
+		}
+		
+		override public function render():void 
+		{
+			if (timer.percentElapsed() < 0.5) {
+				
+				fromWorld.render();
+			}
+			
+			else {
+				
+				toWorld.render();
+			}
+			
+			super.render();
 		}
 	}
 

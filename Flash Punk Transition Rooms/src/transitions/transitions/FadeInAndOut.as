@@ -18,5 +18,4 @@ package transitions.transitions
 			Draw.rect(FP.camera.x, FP.camera.y, FP.width, FP.height, 0, opacity);
 		}
 	}
-
 }
