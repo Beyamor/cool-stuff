@@ -23,12 +23,9 @@ package worlds
 			super();
 			
 			Input.define("transition", Key.ENTER);
-		}
-
-		override public function begin():void 
-		{
-			super.begin();
 			
+			// Uh. Okay.
+			// The entities have to added in the constructor so they can be rendered by the transitioners
 			add(new Entity(0, 0, new Text("Press enter to go to the next world", 0, 20)));
 			
 			add(new Player(FP.width/2, FP.height/2));
@@ -46,7 +43,7 @@ package worlds
 		{
 			super.update();
 			
-			if (Input.pressed("transition")) FP.world = new TransitionWorld(this, new GameWorld(), 1, new FadeInAndOut);
+			if (Input.pressed("transition")) FP.world = new TransitionWorld(this, new GameWorld(), 1, new FadeInAndOut(0xFFFFFF));
 		}
 	}
 

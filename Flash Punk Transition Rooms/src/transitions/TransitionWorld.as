@@ -22,6 +22,14 @@ package transitions
 			_fromWorld = from;
 			_transitionTimer = new Timer(timeInSeconds);
 			
+			// Gotta make sure any entities created in the constructor
+			// are prepped for rendering.
+			_fromWorld.updateLists();
+			_toWorld.updateLists();
+			
+			// View's also gotta be set up right
+			camera = FP.camera;
+			
 			if (effect) {
 				
 				effect.transitionTimer = timer;
@@ -33,15 +41,15 @@ package transitions
 		{
 			super.update();
 			
-			trace(timer.percentElapsed());
+			if (timer.percentElapsed > 0.5 && FP.camera != toWorld.camera) FP.camera = toWorld.camera;
 			
 			timer.update();			
-			if (timer.hasFired()) FP.world = toWorld;
+			if (timer.hasFired) FP.world = toWorld;
 		}
 		
 		override public function render():void 
 		{
-			if (timer.percentElapsed() < 0.5) {
+			if (timer.percentElapsed < 0.5) {
 				
 				fromWorld.render();
 			}

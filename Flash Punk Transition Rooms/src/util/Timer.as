@@ -26,7 +26,7 @@ package util
 			reset();
 		}
 		
-		public function hasFired():Boolean {
+		public function get hasFired():Boolean {
 			
 			return elapsed >= period;
 		}
@@ -36,7 +36,7 @@ package util
 			elapsed += FP.elapsed;
 		}
 		
-		public function percentElapsed():Number
+		public function get percentElapsed():Number
 		{
 			return Math.min(elapsed / period, 1);
 		}
