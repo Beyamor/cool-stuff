@@ -3,13 +3,6 @@
 (defmulti machine-property (fn [read-table property data] property))
 (defmulti state-property (fn [read-table property data] property))
 
-(defn add-state-data
-  "Adds state data (a map of state names to data)
-   to the state table"
-  [table additional-state-data]
-  {:pre [(map? additional-state-data)]}
-  (swap! table #(merge-with merge % additional-state-data)))
-
 (defn initial-state
   "Gets the initial state from a state table.
    At least one of the states is expected to
