@@ -37,3 +37,14 @@
        fsm-state (transition fsm-state)
        res3 (act fsm-state)]
    (is (= [:a :b :a] [res1 res2 res3]))))
+
+(deftest states-include-names
+ (let [fsm-state (fsm
+                   {:initial :a
+                    :states {:a {:next-state :b}
+                             :b {:next-state :a}}})
+       name1 (state-name fsm-state)
+       fsm-state (transition fsm-state)
+       name2 (state-name fsm-state)]
+   (is (= name1 :a))
+   (is (= name2 :b))))

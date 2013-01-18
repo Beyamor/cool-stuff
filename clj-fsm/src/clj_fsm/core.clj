@@ -22,15 +22,25 @@
   [a]
   (fn [] @a))
 
-(defn- table-content
-  "Given a function to read table data,
-   this returns the map resulting from
-   handling all of the machine's properties."
+(defn- table-content*
+  "Like table content, but only reads
+   the machine properties in the spec."
   [read-table machine-spec]
-  (apply merge-with merge
+  [read-table machine-spec]
+    (apply merge-with merge
          (map (fn [[property data]]
                 (machine-property read-table property data))
               machine-spec)))
+
+(defn- table-content
+  "Given a function to read table data,
+   this returns the map resulting from
+   handling all of the machine's properties.
+   Does some post processing to inclued state names."
+  [read-table machine-spec]
+  (into {}
+        (for [[state-name state-data] (table-content* read-table machine-spec)]
+          [state-name (assoc state-data :name state-name)])))
 
 (defn fsm
   "Creates a state machine from a machine spec,
@@ -112,3 +122,5 @@
 
 (def act (make-state-fn :action))
 (def transition (make-state-fn :transition))
+
+(def state-name :name)
