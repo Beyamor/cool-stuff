@@ -10,12 +10,10 @@
   [table]
   {:pre [(map? table)]
    :post [(map? %)]}
-  (->>
-    table
-    (map (fn [[_ state-data]]
-           (if (:initial state-data) state-data)))
-    (filter identity)
-    first))
+  (first
+    (for [[_ state-data] table
+          :when (:initial state-data)]
+      state-data)))
 
 (defn make-read-fn
   "Makes a function which reads a value from an atom"
@@ -26,11 +24,9 @@
   "Like table content, but only reads
    the machine properties in the spec."
   [read-table machine-spec]
-  [read-table machine-spec]
     (apply merge-with merge
-         (map (fn [[property data]]
-                (machine-property read-table property data))
-              machine-spec)))
+           (for [[property data] machine-spec]
+             (machine-property read-table property data))))
 
 (defn- table-content
   "Given a function to read table data,
@@ -56,29 +52,20 @@
   [read-table _ initial-state]
   {initial-state {:initial true}})
 
-(defn- unify-maps
-  "Merges a sequence of maps"
-  [maps]
-  (apply merge {} maps))
-
 (defn- read-state-spec
   "Reads a state spec and generates
    state data based on its properties."
   [read-table state-spec]
-  (unify-maps
-    (map
-      (fn [[property data]]
-        (state-property read-table property data))
-      state-spec)))
+  (apply merge {}
+    (for [[property data] state-spec]
+      (state-property read-table property data))))
 
 (defmethod machine-property
   :states
   [read-table _ state-specs]
-  (unify-maps
-    (map
-      (fn [[state-name state-spec]]
-        {state-name (read-state-spec read-table state-spec)})
-      state-specs)))
+  (into {}
+    (for [[state-name state-spec] state-specs]
+      [state-name (read-state-spec read-table state-spec)])))
 
 (defmethod state-property
   :action
@@ -107,7 +94,8 @@
   :transitions
   [read-table _ transitions]
   {:transition (fn [& args]
-                 (get (read-table) (apply (next-state-fn transitions) args)))})
+                 (get (read-table)
+                      (apply (next-state-fn transitions) args)))})
 
 (defn state-fn
   "Calls a function of the state"
