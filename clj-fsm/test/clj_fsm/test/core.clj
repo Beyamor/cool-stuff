@@ -48,3 +48,20 @@
        name2 (state-name fsm-state)]
    (is (= name1 :a))
    (is (= name2 :b))))
+
+(deftest can-define-rule-of-state
+ (let [cycle-state (fn [read-table {:keys [name] :as state}]
+                     (assoc state
+                            :transition
+                            (always-state read-table (if (= :a name) :b :a))))
+       fsm-state (fsm
+                   {:initial :a
+                    :states {:a {:next-state :b}
+                             :b {:next-state :a}}
+                    :rules {:of-state [cycle-state]}})
+       name1 (state-name fsm-state)
+       fsm-state (transition fsm-state)
+       name2 (state-name fsm-state)
+       fsm-state (transition fsm-state)
+       name3 (state-name fsm-state)]
+   (is (= [:a :b :a] [name1 name2 name3]))))
