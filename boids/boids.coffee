@@ -11,9 +11,16 @@ vector = {
 
 		return result
 
+	length: (v) ->
+		Math.sqrt(vector.lengthSquared(v))
+
+	lengthSquared: (v) ->
+		v.reduce((sum, x) ->
+			sum + x*x
+		, 0)
+
 	distanceSquared: (v1, v2) ->
-		difference = vector.subtract(v1, v2)
-		return difference.reduce((sum, x) -> sum + x*x)
+		vector.lengthSquared(vector.subtract(v1, v2))
 
 
 	subtract: (v1, v2) ->
@@ -29,6 +36,13 @@ vector = {
 
 	direction: (v) ->
 		return Math.atan2(v[1], v[0])
+
+	clampLength: (v, clampedLength) ->
+		lengthSquared = vector.lengthSquared(v)
+		return v if lengthSquared < clampedLength * clampedLength
+		length = Math.sqrt(lengthSquared)
+		clamptScale = clampedLength / length
+		return vector.scale(v, clamptScale)
 }
 
 class Canvas
@@ -61,12 +75,13 @@ random.inRange = (min, max) -> min + random() * (max - min)
 
 # Using the pseudocode from http://www.vergenet.net/~conrad/boids/pseudocode.html
 class Boid
-	constructor: (@flock, @position, @color) ->
-		vx		= random.inRange(5, 10) * random.posOrNeg()
-		vy		= random.inRange(5, 10) * random.posOrNeg()
+	constructor: (@flock, @position, @color, @bounds) ->
+		vx		= random.inRange(0.5, 1) * random.posOrNeg()
+		vy		= random.inRange(0.5, 1) * random.posOrNeg()
 		@velocity	= [vx, vy]
 
 	update: ->
+		[x, y] = @position
 		inverseFlockSize = 1.0 / (@flock.length - 1)
 
 		c1 = [0, 0]
@@ -79,22 +94,44 @@ class Boid
 			c1 = vector.add(c1, boid.position)
 
 			# Rule 2
-			if vector.distanceSquared(@position, boid.position) < 250
-				v2 = vector.subtract(v2, vector.subtract(position.position, @position))
+			if vector.distanceSquared(@position, boid.position) < 1000
+				v2 = vector.subtract(v2, vector.subtract(boid.position, @position))
 
 			# Rule 3
 			v3 = vector.add(v3, boid.velocity)
 
 		# Rule 1 continued
-		c1 = vector.scale(v1, inverseFlockSize)
+		c1 = vector.scale(c1, inverseFlockSize)
 		difference = vector.subtract(c1, @position)
-		v1 = vector.scale(difference, 0.1)
+		v1 = vector.scale(difference, 0.001)
+
+		# Rule 2 continued
+		v2 = vector.scale(v2, 0.125)
 
 		# Rule 3 continued
-		v3 = vector.scaleBy(v3, inverseFlockSize)
-		v3 = vector.scaleBy(vector.subtract(v3, @velocity), 0.125)
+		v3 = vector.scale(v3, inverseFlockSize)
+		v3 = vector.scale(vector.subtract(v3, @velocity), 0.0125)
 
-		@velocity	= vector.add(@velocity, v1, v2, v3)
+		# Encourage boids to stay in onscreen
+		inwardVelX =\
+			if x < bounds.minX
+				1
+			else if x > bounds.maxX
+				-1
+			else
+				0
+		inwardVelY =\
+			if y < bounds.minY
+				1
+			else if y > bounds.maxY
+				-1
+			else
+				0
+
+		inwardVel = [inwardVelX, inwardVelY]
+		
+		@velocity	= vector.add(@velocity, v1, v2, v3, inwardVel)
+		@velocity	= vector.clampLength(@velocity, 5)
 		@position	= vector.add(@position, @velocity)
 
 	draw: (canvas) ->
@@ -116,11 +153,17 @@ canvas.clear()
 
 boidColors = ["#61E6E8", "#E8C061", "#F2C2E0"]
 
+bounds = {minX: 0, maxX: canvas.width, minY: 0, maxY: canvas.height}
+
 flock = []
-for i in [0..Math.floor(20 + 20 * Math.random())]
+for i in [0..Math.floor(40 + 20 * Math.random())]
 	pos	= [Math.random() * canvas.width, Math.random() * canvas.height]
 	color	= boidColors[i % boidColors.length]
-	flock.push new Boid(flock, pos, color)
+	flock.push new Boid(flock, pos, color, bounds)
 
-for boid in flock
-	boid.draw canvas
+setInterval(->
+	canvas.clear()
+	for boid in flock
+		boid.update()
+		boid.draw(canvas)
+, 16)
