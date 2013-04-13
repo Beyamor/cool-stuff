@@ -27,6 +27,8 @@
 
   canvas = new Canvas("boids");
 
+  canvas.clearColor = "#202638";
+
   canvas.clear();
 
 }).call(this);

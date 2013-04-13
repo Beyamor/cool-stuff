@@ -14,4 +14,5 @@ class Canvas
 		@drawRect(0, 0, @width, @height, @clearColor)
 
 canvas = new Canvas("boids")
+canvas.clearColor = "#202638"
 canvas.clear()
