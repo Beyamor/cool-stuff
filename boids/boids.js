@@ -45,6 +45,12 @@
     direction: function(v) {
       return Math.atan2(v[1], v[0]);
     },
+    directionTo: function(_arg, _arg1) {
+      var fromX, fromY, toX, toY;
+      fromX = _arg[0], fromY = _arg[1];
+      toX = _arg1[0], toY = _arg1[1];
+      return Math.atan2(toY - fromY, toX - fromX);
+    },
     clampLength: function(v, clampedLength) {
       var clamptScale, length, lengthSquared;
       lengthSquared = vector.lengthSquared(v);
@@ -54,6 +60,9 @@
       length = Math.sqrt(lengthSquared);
       clamptScale = clampedLength / length;
       return vector.scale(v, clamptScale);
+    },
+    fromDirectionAndLength: function(direction, length) {
+      return [length * Math.cos(direction), length * Math.sin(direction)];
     }
   };
 
@@ -120,7 +129,7 @@
     }
 
     Boid.prototype.update = function() {
-      var boid, c1, difference, inverseFlockSize, inwardVel, inwardVelX, inwardVelY, v1, v2, v3, x, y, _i, _len, _ref, _ref1;
+      var boid, c1, difference, direction, distanceSquared, influence, inverseFlockSize, inwardVel, inwardVelX, inwardVelY, v1, v2, v3, x, y, _i, _len, _ref, _ref1;
       _ref = this.position, x = _ref[0], y = _ref[1];
       inverseFlockSize = 1.0 / (this.flock.length - 1);
       c1 = [0, 0];
@@ -133,15 +142,17 @@
           continue;
         }
         c1 = vector.add(c1, boid.position);
-        if (vector.distanceSquared(this.position, boid.position) < 1000) {
-          v2 = vector.subtract(v2, vector.subtract(boid.position, this.position));
+        distanceSquared = vector.distanceSquared(this.position, boid.position);
+        if (distanceSquared < 1000) {
+          influence = 1 - distanceSquared / 1000;
+          direction = vector.directionTo(boid.position, this.position);
+          v2 = vector.add(v2, vector.fromDirectionAndLength(direction, influence));
         }
         v3 = vector.add(v3, boid.velocity);
       }
       c1 = vector.scale(c1, inverseFlockSize);
       difference = vector.subtract(c1, this.position);
       v1 = vector.scale(difference, 0.001);
-      v2 = vector.scale(v2, 0.125);
       v3 = vector.scale(v3, inverseFlockSize);
       v3 = vector.scale(vector.subtract(v3, this.velocity), 0.0125);
       inwardVelX = x < bounds.minX ? 1 : x > bounds.maxX ? -1 : 0;
@@ -185,7 +196,7 @@
 
   flock = [];
 
-  for (i = _i = 0, _ref = Math.floor(40 + 20 * Math.random()); 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+  for (i = _i = 0, _ref = Math.floor(60 + 20 * Math.random()); 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
     pos = [Math.random() * canvas.width, Math.random() * canvas.height];
     color = boidColors[i % boidColors.length];
     flock.push(new Boid(flock, pos, color, bounds));

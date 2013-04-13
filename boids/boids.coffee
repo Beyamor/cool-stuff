@@ -32,10 +32,13 @@ vector = {
 		return result
 
 	scale: (v, scale) ->
-		return v.map((x) -> x*scale)
+		v.map((x) -> x*scale)
 
 	direction: (v) ->
-		return Math.atan2(v[1], v[0])
+		Math.atan2(v[1], v[0])
+
+	directionTo: ([fromX, fromY], [toX, toY]) ->
+		Math.atan2(toY - fromY, toX - fromX)
 
 	clampLength: (v, clampedLength) ->
 		lengthSquared = vector.lengthSquared(v)
@@ -43,6 +46,9 @@ vector = {
 		length = Math.sqrt(lengthSquared)
 		clamptScale = clampedLength / length
 		return vector.scale(v, clamptScale)
+
+	fromDirectionAndLength: (direction, length) ->
+		[length * Math.cos(direction), length * Math.sin(direction)]
 }
 
 class Canvas
@@ -94,8 +100,11 @@ class Boid
 			c1 = vector.add(c1, boid.position)
 
 			# Rule 2
-			if vector.distanceSquared(@position, boid.position) < 1000
-				v2 = vector.subtract(v2, vector.subtract(boid.position, @position))
+			distanceSquared = vector.distanceSquared(@position, boid.position)
+			if distanceSquared < 1000
+				influence = (1 - distanceSquared / 1000)
+				direction = vector.directionTo(boid.position, @position)
+				v2 = vector.add(v2, vector.fromDirectionAndLength(direction, influence))
 
 			# Rule 3
 			v3 = vector.add(v3, boid.velocity)
@@ -104,9 +113,6 @@ class Boid
 		c1 = vector.scale(c1, inverseFlockSize)
 		difference = vector.subtract(c1, @position)
 		v1 = vector.scale(difference, 0.001)
-
-		# Rule 2 continued
-		v2 = vector.scale(v2, 0.125)
 
 		# Rule 3 continued
 		v3 = vector.scale(v3, inverseFlockSize)
@@ -156,7 +162,7 @@ boidColors = ["#61E6E8", "#E8C061", "#F2C2E0"]
 bounds = {minX: 0, maxX: canvas.width, minY: 0, maxY: canvas.height}
 
 flock = []
-for i in [0..Math.floor(40 + 20 * Math.random())]
+for i in [0..Math.floor(60 + 20 * Math.random())]
 	pos	= [Math.random() * canvas.width, Math.random() * canvas.height]
 	color	= boidColors[i % boidColors.length]
 	flock.push new Boid(flock, pos, color, bounds)
