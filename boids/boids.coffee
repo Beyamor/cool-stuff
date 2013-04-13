@@ -1,5 +1,5 @@
 # Vector operations
-vector =\
+vector = {
 	add: (vs...) ->
 		result = []
 
@@ -7,7 +7,7 @@ vector =\
 			sum = 0
 			for v in vs
 				sum += v[dimension]
-			result.push v
+			result.push sum
 
 		return result
 
@@ -25,8 +25,11 @@ vector =\
 		return result
 
 	scale: (v, scale) ->
-		v.map (x) -> x*scale
+		return v.map((x) -> x*scale)
 
+	direction: (v) ->
+		return Math.atan2(v[1], v[0])
+}
 
 class Canvas
 	constructor: (id) ->
@@ -40,14 +43,28 @@ class Canvas
 		@context.fillStyle = color
 		@context.fillRect(x, y, width, height)
 
+	drawTriangle: ([x1, y1], [x2, y2], [x3, y3], color) ->
+		@context.beginPath()
+		@context.moveTo(x1, y1)
+		@context.lineTo(x2, y2)
+		@context.lineTo(x3, y3)
+		@context.lineTo(x1, y1)
+		@context.fillStyle = color
+		@context.fill()
+
 	clear: ->
 		@drawRect(0, 0, @width, @height, @clearColor)
 
+random = -> Math.random()
+random.posOrNeg = -> random() < 0.5
+random.inRange = (min, max) -> min + random() * (max - min)
+
 # Using the pseudocode from http://www.vergenet.net/~conrad/boids/pseudocode.html
 class Boid
-	constructor: (pos) ->
-		@position	= pos
-		@velocity	= [5 + Math.random() * 5, 5 + Math.random() * 5]
+	constructor: (@flock, @position, @color) ->
+		vx		= random.inRange(5, 10) * random.posOrNeg()
+		vy		= random.inRange(5, 10) * random.posOrNeg()
+		@velocity	= [vx, vy]
 
 	update: ->
 		inverseFlockSize = 1.0 / (@flock.length - 1)
@@ -80,6 +97,30 @@ class Boid
 		@velocity	= vector.add(@velocity, v1, v2, v3)
 		@position	= vector.add(@position, @velocity)
 
+	draw: (canvas) ->
+		[x, y] = @position
+
+		direction	= vector.direction(@velocity)
+		tailDirection1	= direction + Math.PI * 0.75
+		tailDirection2	= direction - Math.PI * 0.75
+
+		p1 = vector.add(@position, [Math.cos(direction) * 10, Math.sin(direction) * 10])
+		p2 = vector.add(@position, [Math.cos(tailDirection1) * 5, Math.sin(tailDirection1) * 5])
+		p3 = vector.add(@position, [Math.cos(tailDirection2) * 5, Math.sin(tailDirection2) * 5])
+
+		canvas.drawTriangle(p1, p2, p3, @color)
+
 canvas = new Canvas("boids")
 canvas.clearColor = "#202638"
 canvas.clear()
+
+boidColors = ["#61E6E8", "#E8C061", "#F2C2E0"]
+
+flock = []
+for i in [0..Math.floor(20 + 20 * Math.random())]
+	pos	= [Math.random() * canvas.width, Math.random() * canvas.height]
+	color	= boidColors[i % boidColors.length]
+	flock.push new Boid(flock, pos, color)
+
+for boid in flock
+	boid.draw canvas
