@@ -7,6 +7,7 @@
            java.awt.Color))
 
 (defn draw-form
+  "Awesome. Draws a form, taking into acount some parameters."
   [graphics instructions
    & {:keys [step-size angle-increment initial-x initial-y]
       :or {step-size 2 angle-increment 90 initial-x 300 initial-y 200}}]
@@ -40,19 +41,31 @@
     :minimum-size [800 :by 600]
     :on-close :exit))
 
-(defn paint-form
-  [form & args]
-  (fn [_ graphics]
-    (draw graphics
-          (rect 0 0 600 400)
-          (style :background :white))
-    (apply draw-form graphics form args)))
+(defn paint-model
+  "Returns a function used to paint the given model."
+  [model]
+  (fn [el graphics]
+    (let [{:keys [step-size form]
+           {:keys [x y]} :origin} @model]
+      (draw graphics
+            (rect 0 0 (width el) (height el))
+            (style :background :white))
+      (draw-form graphics form
+                 :initial-x x
+                 :initial-y y
+                 :step-size step-size))))
+
 
 (defn lsys-canvas
-  []
-  (canvas
-     :id :canvas
-     :size [600 :by 400]))
+  "Creates a canvas which redraws when the model changes."
+  [model]
+  (let [c (canvas
+            :size [600 :by 400]
+            :paint (paint-model model))]
+    (add-watch model nil
+               (fn [_ _ _ model-value]
+                 (repaint! c)))
+    c))
 
 (defn labelled
   "Stuffs the el in a panel alongside the given label."
@@ -61,6 +74,7 @@
     :items [(str label ": ") el]))
 
 (defn with-border
+  "Adds a black border to an el."
   [el]
   (doto el (.setBorder (BorderFactory/createLineBorder Color/black))))
 
@@ -69,41 +83,77 @@
   [id root]
   (-> (select root [id]) value))
 
-(defn generate-callback
-  [root]
-  (fn [e]
-    (let [axiom (-> (value-of :#axiom root) parse-axiom)
-          productions (-> (value-of :#productions root) parse-rule-block)
-          number-of-iterations (value-of :#count root)
-          step-size (value-of :#step root)
-          form (transform axiom number-of-iterations (rule-book productions))
-          canvas (select root [:#canvas])]
-      (config! canvas :paint (paint-form form :step-size step-size :angle-increment 90))
-      (repaint! canvas))))
+(defn on-change
+  "Adds a listener which reacts to an element's new value."
+  [el reaction]
+  (listen el
+          :change (fn [e] (-> (value el) reaction)))
+  el)
+
+(defn recalculate-form-when-any-change
+  "When the given els change, the form is recalculated."
+  [model root & els]
+  (doseq [el els
+          :let [change-types (if (instance? javax.swing.text.JTextComponent el)
+                               #{:remove-update :insert-update}
+                               :change)]]
+    (listen el
+            change-types
+            (fn [_]
+              (let [axiom (value-of :#axiom root)
+                    productions (value-of :#productions root)
+                    number-of-iterations (value-of :#count root)]
+                (swap! model
+                       assoc :form
+                       (transform (parse-axiom axiom)
+                                  number-of-iterations
+                                  (-> productions parse-rule-block rule-book))))))))
 
 (defn -main
   [& args]
-  (let [main (main-panel
+  (let [model (atom {:form []
+                     :step-size 10
+                     :origin {:x 300 :y 200}})
+
+        main (main-panel
                "L-Systems"
-               (lsys-canvas)
+               (lsys-canvas model)
                (->
-                 (slider :id :count :min 1 :max 6 :value 2 :major-tick-spacing 1 :snap-to-ticks? true)
+                 (slider
+                   :id :count
+                   :min 1
+                   :max 6
+                   :value 2
+                   :major-tick-spacing 1
+                   :snap-to-ticks? true)
                  (labelled "Number of iterations"))
                (->
-                 (slider :id :step :min 1 :max 30 :value 10)
+                 (slider
+                   :id :step
+                   :min 1
+                   :max 30
+                   :value (@model :step-size))
+                 (on-change #(swap! model assoc :step-size %))
                  (labelled "Line length"))
                (->
-                 (text :id :axiom :size [300 :by 20])
+                 (text
+                   :id :axiom
+                   :size [300 :by 20])
                  with-border
                  (labelled "Axiom"))
                (->
-                 (text :id :productions :multi-line? true :columns 20 :rows 8)
+                 (text
+                   :id :productions
+                   :multi-line? true
+                   :columns 20
+                   :rows 8)
                  with-border
                  (scrollable :vscroll :always)
                  (labelled "Productions")))]
-    (add! main
-          (button
-            :text "Give 'er"
-            :listen [:action (generate-callback main)]))
+    (recalculate-form-when-any-change
+      model main
+      (select main [:#count])
+      (select main [:#axiom])
+      (select main [:#productions]))
     (invoke-later
       (-> (main-frame main) pack! show!))))
