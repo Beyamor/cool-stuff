@@ -1,15 +1,15 @@
 (ns linden.view
   (:use seesaw.core
         [seesaw.color :only [color]]
-        [seesaw.graphics :only [draw rect style]]))
+        [seesaw.graphics :only [draw rect style]])
+  (:import javax.swing.BorderFactory
+           java.awt.Color))
 
 (defn draw-form
   [graphics instructions
    & {:keys [step-size angle-increment initial-x initial-y]
       :or {step-size 20 angle-increment 90 initial-x 300 initial-y 200}}]
-
   (.setColor graphics (color :black))
-
   (loop [x initial-x, y initial-y, angle 90, instructions instructions]
     (when (seq instructions)
       (let [[instruction & more-instructions] instructions]
@@ -47,12 +47,30 @@
                 graphics
                 ["F" "F" "F" "-" "F" "F" "-" "F" "-" "F" "+" "F" "+" "F" "F" "-" "F" "-" "F" "F" "F"]))))
 
+(defn labelled-el
+  [label el]
+  (horizontal-panel
+    :items [(str label ": ") el]))
+
+(defn with-border
+  [el]
+  (doto el (.setBorder (BorderFactory/createLineBorder Color/black))))
+
 (defn -main
   [& args]
   (invoke-later
     (->
-    (main-panel
-      "L-Systems"
-      (lsys-canvas))
-      pack!
-      show!)))
+      (main-panel
+        "L-Systems"
+        (lsys-canvas)
+        (labelled-el "Axiom"
+                     (->
+                       (text :id :axiom :size [300 :by 20])
+                       with-border))
+        (labelled-el "Productions"
+                     (->
+                       (text :id :axiom :multi-line? true :columns 20 :rows 8)
+                       with-border
+                       (scrollable :vscroll :always))))
+        pack!
+        show!)))
