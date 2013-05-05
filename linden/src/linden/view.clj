@@ -22,19 +22,19 @@
     (when (seq instructions)
       (let [[instruction & more-instructions] instructions]
         (case instruction
-          "f"
+          \F
           (let [[next-x next-y] (next-xy x y angle step-size)]
             (.drawLine graphics x y next-x next-y)
             (recur next-x next-y angle more-instructions))
 
-          "F"
+          \f
           (let [[next-x next-y] (next-xy x y angle step-size)]
             (recur next-x next-y angle more-instructions))
 
-          "-"
+          \-
           (recur x y (- angle angle-increment) more-instructions)
 
-          "+"
+          \+
           (recur x y (+ angle angle-increment) more-instructions)
 
           "Do nothing")))))
