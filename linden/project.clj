@@ -5,4 +5,4 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [seesaw "1.4.3"]]
-  :main linden.core)
+  :main linden.view)
