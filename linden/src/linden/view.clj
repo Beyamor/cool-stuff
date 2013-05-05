@@ -41,12 +41,12 @@
     :on-close :exit))
 
 (defn paint-form
-  [form]
+  [form & args]
   (fn [_ graphics]
     (draw graphics
           (rect 0 0 600 400)
           (style :background :white))
-    (draw-form graphics form)))
+    (apply draw-form graphics form args)))
 
 (defn lsys-canvas
   []
@@ -68,10 +68,12 @@
   (fn [e]
     (let [axiom (-> (select root [:#axiom]) value parse-axiom)
           productions (-> (select root [:#productions]) value parse-rule-block)
-          number-of-iterations (-> (select root [:#count]) value Integer.)
+          number-of-iterations (-> (select root [:#count]) value)
+          step-size (-> (select root [:#step]) value)
+          angle-increment (-> (select root [:#angle]) value)
           form (transform axiom number-of-iterations (rule-book productions))
           canvas (select root [:#canvas])]
-      (config! canvas :paint (paint-form form))
+      (config! canvas :paint (paint-form form :step-size step-size :angle-increment angle-increment))
       (repaint! canvas))))
 
 (defn -main
@@ -81,6 +83,10 @@
                (lsys-canvas)
                (labelled-el "Number of iterations"
                             (slider :id :count :min 1 :max 6 :value 2 :major-tick-spacing 1 :snap-to-ticks? true))
+               (labelled-el "Line length"
+                            (slider :id :step :min 1 :max 30 :value 10))
+               (labelled-el "Angle increment"
+                            (slider :id :angle :min 15 :max 165 :value 90 :major-tick-spacing 5 :snap-to-ticks? true))
                (labelled-el "Axiom"
                             (->
                               (text :id :axiom :size [300 :by 20])
