@@ -15,7 +15,7 @@
     (when (seq instructions)
       (let [[instruction & more-instructions] instructions]
         (case instruction
-          "F"
+          "f"
           (let [next-x (+ x (-> angle Math/toRadians Math/cos (* step-size)))
                 next-y (+ y (-> angle Math/toRadians Math/sin (* -1 step-size)))]
             (.drawLine graphics x y next-x next-y)
@@ -40,18 +40,19 @@
     :minimum-size [800 :by 600]
     :on-close :exit))
 
-(defn lsys-canvas
+(defn paint-form
   [form]
+  (fn [_ graphics]
+    (draw graphics
+          (rect 0 0 600 400)
+          (style :background :white))
+    (draw-form graphics form)))
+
+(defn lsys-canvas
+  []
   (canvas
      :id :canvas
-     :size [600 :by 400]
-     :paint (fn [this graphics]
-              (draw graphics
-                    (rect 0 0 600 400)
-                    (style :background :white))
-              (draw-form
-                graphics
-                @form))))
+     :size [600 :by 400]))
 
 (defn labelled-el
   [label el]
@@ -63,19 +64,23 @@
   (doto el (.setBorder (BorderFactory/createLineBorder Color/black))))
 
 (defn generate-callback
-  [root form]
+  [root]
   (fn [e]
     (let [axiom (-> (select root [:#axiom]) value parse-axiom)
-          productions (-> (select root [:#productions]) value parse-rule-block)]
-      (reset! form (transform axiom 4 (rule-book productions)))
-      (repaint! (select root [:#canvas])))))
+          productions (-> (select root [:#productions]) value parse-rule-block)
+          number-of-iterations (-> (select root [:#count]) value Integer.)
+          form (transform axiom number-of-iterations (rule-book productions))
+          canvas (select root [:#canvas])]
+      (config! canvas :paint (paint-form form))
+      (repaint! canvas))))
 
 (defn -main
   [& args]
-  (let [form (atom [])
-        main (main-panel
+  (let [main (main-panel
                "L-Systems"
-               (lsys-canvas form)
+               (lsys-canvas)
+               (labelled-el "Number of iterations"
+                            (slider :id :count :min 1 :max 6 :value 2 :major-tick-spacing 1 :snap-to-ticks? true))
                (labelled-el "Axiom"
                             (->
                               (text :id :axiom :size [300 :by 20])
@@ -88,6 +93,6 @@
     (add! main
           (button
             :text "Give 'er"
-            :listen [:action (generate-callback main form)]))
+            :listen [:action (generate-callback main)]))
     (invoke-later
       (-> (main-frame main) pack! show!))))
