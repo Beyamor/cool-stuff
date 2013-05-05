@@ -26,24 +26,33 @@
           "+"
           (recur x y (+ angle angle-increment) more-instructions))))))
 
+(defn main-panel
+  [& contents]
+  (frame
+    :title "L-Systems"
+    :content (vertical-panel
+               :items contents)
+    :minimum-size [800 :by 600]
+    :on-close :exit))
+
+(defn lsys-canvas
+  []
+  (canvas
+     :size [600 :by 400]
+     :paint (fn [this graphics]
+              (draw graphics
+                    (rect 0 0 600 400)
+                    (style :background :white))
+              (draw-form
+                graphics
+                ["F" "F" "F" "-" "F" "F" "-" "F" "-" "F" "+" "F" "+" "F" "F" "-" "F" "-" "F" "F" "F"]))))
+
 (defn -main
   [& args]
   (invoke-later
     (->
-      (frame
-        :title "L-Systems"
-        :content (vertical-panel
-                   :items ["L-Systems"
-                           (canvas
-                             :size [600 :by 400]
-                             :paint (fn [this graphics]
-                                      (draw graphics
-                                            (rect 0 0 600 400)
-                                            (style :background :white))
-                                      (draw-form
-                                        graphics
-                                        ["F" "F" "F" "-" "F" "F" "-" "F" "-" "F" "+" "F" "+" "F" "F" "-" "F" "-" "F" "F" "F"])))])
-        :minimum-size [800 :by 600]
-        :on-close :exit)
+    (main-panel
+      "L-Systems"
+      (lsys-canvas))
       pack!
       show!)))
