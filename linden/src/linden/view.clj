@@ -132,17 +132,14 @@
                (->
                  (slider
                    :id :count
-                   :min 1
-                   :max 6
-                   :value 2
+                   :min 1 :max 6 :value 2
                    :major-tick-spacing 1
                    :snap-to-ticks? true)
                  (labelled "Number of iterations"))
                (->
                  (slider
                    :id :step
-                   :min 1
-                   :max 30
+                   :min 1 :max 30
                    :value (@model :step-size))
                  (on-change #(swap! model assoc :step-size %))
                  (labelled "Line length"))
