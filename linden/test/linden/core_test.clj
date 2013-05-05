@@ -17,3 +17,11 @@
                 (parse-rule-block
                   "F -> F-F
                    F -> FF-F"))))
+
+(deftest can-create-a-rule-book
+         (is (= {"A" #{"B"}
+                 "B" #{"A" "B"}}
+                (rule-book
+                  [{:pred "A" :succ "B"}
+                   {:pred "B" :succ "A"}
+                   {:pred "B" :succ "B"}]))))
