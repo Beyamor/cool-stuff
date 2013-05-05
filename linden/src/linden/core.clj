@@ -22,3 +22,10 @@
         (assoc book succ #{pred})))
     {}
     rules))
+
+(defn produce
+  "Takes a successor and a rule book and produces something."
+  [succ rule-book]
+  (if (contains? rule-book succ)
+    (-> (get rule-book succ) vec rand-nth)
+    succ))

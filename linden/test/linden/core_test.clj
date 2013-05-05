@@ -25,3 +25,7 @@
                   [{:pred "A" :succ "B"}
                    {:pred "B" :succ "A"}
                    {:pred "B" :succ "B"}]))))
+
+(deftest can-produce
+         (is (= "B" (produce "A" {"A" #{"B"}})))
+         (is (= "A" (produce "A" {}))))
