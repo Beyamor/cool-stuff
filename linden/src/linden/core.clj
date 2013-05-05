@@ -1,6 +1,8 @@
 (ns linden.core
   (:use [clojure.string :only [split trim]]
-        seesaw.core))
+        seesaw.core
+        [seesaw.color :only [color]]
+        [seesaw.graphics :only [draw rect style]]))
 
 (defn parse-rule
   [input]
@@ -15,7 +17,14 @@
     (->
       (frame
         :title "L-Systems"
-        :content "L-Systems go!"
+        :content (vertical-panel
+                   :items ["L-Systems"
+                           (canvas
+                             :size [600 :by 400]
+                             :paint (fn [this graphics]
+                                      (draw graphics
+                                            (rect 0 0 600 400)
+                                            (style :background :white))))])
         :minimum-size [800 :by 600]
         :on-close :exit)
       pack!
