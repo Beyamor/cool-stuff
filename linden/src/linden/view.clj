@@ -63,17 +63,21 @@
   [el]
   (doto el (.setBorder (BorderFactory/createLineBorder Color/black))))
 
+(defn value-of
+  "The value of some component, selected by id"
+  [id root]
+  (-> (select root [id]) value))
+
 (defn generate-callback
   [root]
   (fn [e]
-    (let [axiom (-> (select root [:#axiom]) value parse-axiom)
-          productions (-> (select root [:#productions]) value parse-rule-block)
-          number-of-iterations (-> (select root [:#count]) value)
-          step-size (-> (select root [:#step]) value)
-          angle-increment (-> (select root [:#angle]) value)
+    (let [axiom (-> (value-of :#axiom root) parse-axiom)
+          productions (-> (value-of :#productions root) parse-rule-block)
+          number-of-iterations (value-of :#count root)
+          step-size (value-of :#step root)
           form (transform axiom number-of-iterations (rule-book productions))
           canvas (select root [:#canvas])]
-      (config! canvas :paint (paint-form form :step-size step-size :angle-increment angle-increment))
+      (config! canvas :paint (paint-form form :step-size step-size :angle-increment 90))
       (repaint! canvas))))
 
 (defn -main
@@ -85,8 +89,6 @@
                             (slider :id :count :min 1 :max 6 :value 2 :major-tick-spacing 1 :snap-to-ticks? true))
                (labelled-el "Line length"
                             (slider :id :step :min 1 :max 30 :value 10))
-               (labelled-el "Angle increment"
-                            (slider :id :angle :min 15 :max 165 :value 90 :major-tick-spacing 5 :snap-to-ticks? true))
                (labelled-el "Axiom"
                             (->
                               (text :id :axiom :size [300 :by 20])
