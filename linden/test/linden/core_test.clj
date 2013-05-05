@@ -27,5 +27,8 @@
                    {:pred "B" :succ "B"}]))))
 
 (deftest can-produce
-         (is (= "B" (produce "A" {"A" #{"B"}})))
-         (is (= "A" (produce "A" {}))))
+         (is (= ["B"] (produce "A" {"A" #{["B"]}})))
+         (is (= ["A"] (produce "A" {}))))
+
+(deftest can-transform
+         (is (= ["A" "B" "B" "B"] (transform ["A"] 3 {"A" #{["A" "B"]}}))))
