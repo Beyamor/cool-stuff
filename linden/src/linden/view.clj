@@ -6,6 +6,12 @@
   (:import javax.swing.BorderFactory
            java.awt.Color))
 
+(defn next-xy
+  "Given an angle and a step size, this returns the next x and y."
+  [x y angle step-size]
+  [(+ x (-> angle Math/toRadians Math/cos (* step-size)))
+   (+ y (-> angle Math/toRadians Math/sin (* -1 step-size)))])
+
 (defn draw-form
   "Awesome. Draws a form, taking into acount some parameters."
   [graphics instructions
@@ -17,16 +23,21 @@
       (let [[instruction & more-instructions] instructions]
         (case instruction
           "f"
-          (let [next-x (+ x (-> angle Math/toRadians Math/cos (* step-size)))
-                next-y (+ y (-> angle Math/toRadians Math/sin (* -1 step-size)))]
+          (let [[next-x next-y] (next-xy x y angle step-size)]
             (.drawLine graphics x y next-x next-y)
+            (recur next-x next-y angle more-instructions))
+
+          "F"
+          (let [[next-x next-y] (next-xy x y angle step-size)]
             (recur next-x next-y angle more-instructions))
 
           "-"
           (recur x y (- angle angle-increment) more-instructions)
 
           "+"
-          (recur x y (+ angle angle-increment) more-instructions))))))
+          (recur x y (+ angle angle-increment) more-instructions)
+
+          "Do nothing")))))
 
 (defn main-panel
   [& contents]
