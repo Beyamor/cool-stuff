@@ -54,8 +54,9 @@
      :id :canvas
      :size [600 :by 400]))
 
-(defn labelled-el
-  [label el]
+(defn labelled
+  "Stuffs the el in a panel alongside the given label."
+  [el label]
   (horizontal-panel
     :items [(str label ": ") el]))
 
@@ -85,19 +86,21 @@
   (let [main (main-panel
                "L-Systems"
                (lsys-canvas)
-               (labelled-el "Number of iterations"
-                            (slider :id :count :min 1 :max 6 :value 2 :major-tick-spacing 1 :snap-to-ticks? true))
-               (labelled-el "Line length"
-                            (slider :id :step :min 1 :max 30 :value 10))
-               (labelled-el "Axiom"
-                            (->
-                              (text :id :axiom :size [300 :by 20])
-                              with-border))
-               (labelled-el "Productions"
-                            (->
-                              (text :id :productions :multi-line? true :columns 20 :rows 8)
-                              with-border
-                              (scrollable :vscroll :always))))]
+               (->
+                 (slider :id :count :min 1 :max 6 :value 2 :major-tick-spacing 1 :snap-to-ticks? true)
+                 (labelled "Number of iterations"))
+               (->
+                 (slider :id :step :min 1 :max 30 :value 10)
+                 (labelled "Line length"))
+               (->
+                 (text :id :axiom :size [300 :by 20])
+                 with-border
+                 (labelled "Axiom"))
+               (->
+                 (text :id :productions :multi-line? true :columns 20 :rows 8)
+                 with-border
+                 (scrollable :vscroll :always)
+                 (labelled "Productions")))]
     (add! main
           (button
             :text "Give 'er"
