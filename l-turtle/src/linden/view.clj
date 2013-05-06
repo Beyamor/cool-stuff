@@ -38,6 +38,12 @@
                  \+
                  (update-in state [:angle] + angle-increment)
 
+                 \[
+                 (assoc state :previous-state state)
+
+                 \]
+                 (get state :previous-state)
+
                  ; In the default case, do nothing
                  state))))))
 
