@@ -6,11 +6,12 @@
   (:import javax.swing.BorderFactory
            java.awt.Color))
 
-(defn next-xy
-  "Given an angle and a step size, this returns the next x and y."
-  [x y angle step-size]
-  [(+ x (-> angle Math/toRadians Math/cos (* step-size)))
-   (+ y (-> angle Math/toRadians Math/sin (* -1 step-size)))])
+(defn step
+  "Given a state, this adds a step to its x and y in its current direction."
+  [{:as state :keys [angle]} step-size]
+  (-> state
+    (update-in [:x] + (-> angle Math/toRadians Math/cos (* step-size)))
+    (update-in [:y] - (-> angle Math/toRadians Math/sin (* step-size)))))
 
 (defn draw-form
   "Awesome. Draws a form, taking into acount some parameters."
@@ -18,27 +19,26 @@
    & {:keys [step-size angle-increment initial-x initial-y]
       :or {step-size 2 angle-increment 90 initial-x 300 initial-y 200}}]
   (.setColor graphics (color :black))
-  (loop [x initial-x, y initial-y, angle 90, instructions instructions]
+  (loop [instructions instructions, state {:x initial-x :y initial-y :angle 90}]
     (when (seq instructions)
       (let [[instruction & more-instructions] instructions]
         (case instruction
           \F
-          (let [[next-x next-y] (next-xy x y angle step-size)]
-            (.drawLine graphics x y next-x next-y)
-            (recur next-x next-y angle more-instructions))
+          (let [next-state (step state step-size)]
+            (.drawLine graphics (:x state) (:y state) (:x next-state) (:y next-state))
+            (recur more-instructions next-state))
 
           \f
-          (let [[next-x next-y] (next-xy x y angle step-size)]
-            (recur next-x next-y angle more-instructions))
+          (recur more-instructions (step state step-size))
 
           \-
-          (recur x y (- angle angle-increment) more-instructions)
+          (recur more-instructions (update-in state [:angle] - angle-increment))
 
           \+
-          (recur x y (+ angle angle-increment) more-instructions)
+          (recur more-instructions (update-in state [:angle] + angle-increment))
 
           ; Do nothing
-          (recur x y angle more-instructions))))))
+          (recur more-instructions state))))))
 
 (defn main-panel
   [& contents]
