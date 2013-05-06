@@ -37,7 +37,8 @@
           \+
           (recur x y (+ angle angle-increment) more-instructions)
 
-          "Do nothing")))))
+          ; Do nothing
+          (recur x y angle more-instructions))))))
 
 (defn main-panel
   [& contents]
