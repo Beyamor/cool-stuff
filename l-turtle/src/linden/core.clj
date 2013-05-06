@@ -42,10 +42,10 @@
 
 (defn produce
   "Takes a successor and a rule book and produces something."
-  [succ rule-book]
-  (if (contains? rule-book succ)
-    (-> (get rule-book succ) vec rand-nth)
-    [succ]))
+  [pred rule-book]
+  (if (contains? rule-book pred)
+    (-> (get rule-book pred) vec rand-nth)
+    [pred]))
 
 (defn transform
   "Transforms some input by producing its elements some number of times."
