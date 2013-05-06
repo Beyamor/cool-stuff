@@ -57,7 +57,7 @@
   "Returns a function used to paint the given model."
   [model]
   (fn [el graphics]
-    (let [{:keys [step-size form]
+    (let [{:keys [step-size angle-increment form]
            {:keys [x y]} :origin} @model]
       (draw graphics
             (rect 0 0 (width el) (height el))
@@ -65,6 +65,7 @@
       (draw-form graphics form
                  :initial-x x
                  :initial-y y
+                 :angle-increment angle-increment
                  :step-size step-size))))
 
 
@@ -125,6 +126,7 @@
   [& args]
   (let [model (atom {:form []
                      :step-size 10
+                     :angle-increment 90
                      :origin {:x 300 :y 200}})
 
         main (main-panel
@@ -144,6 +146,15 @@
                    :value (@model :step-size))
                  (on-change #(swap! model assoc :step-size %))
                  (labelled "Line length"))
+               (->
+                 (slider
+                   :id :angle
+                   :min 10 :max 170
+                   :value (@model :angle-increment)
+                   :major-tick-spacing 10
+                   :snap-to-ticks? true)
+                 (on-change #(swap! model assoc :angle-increment %))
+                 (labelled "Angle increment"))
                (->
                  (text
                    :id :axiom
