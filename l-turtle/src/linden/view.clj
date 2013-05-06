@@ -22,23 +22,26 @@
   (loop [instructions instructions, state {:x initial-x :y initial-y :angle 90}]
     (when (seq instructions)
       (let [[instruction & more-instructions] instructions]
-        (case instruction
-          \F
-          (let [next-state (step state step-size)]
-            (.drawLine graphics (:x state) (:y state) (:x next-state) (:y next-state))
-            (recur more-instructions next-state))
+        (recur more-instructions
+               (case instruction
+                 \F
+                 (let [next-state (step state step-size)]
+                   (.drawLine graphics (:x state) (:y state) (:x next-state) (:y next-state))
+                   next-state)
 
-          \f
-          (recur more-instructions (step state step-size))
+                 \f
+                 (step state step-size)
 
-          \-
-          (recur more-instructions (update-in state [:angle] - angle-increment))
+                 \-
+                 (update-in state [:angle] - angle-increment)
 
-          \+
-          (recur more-instructions (update-in state [:angle] + angle-increment))
+                 \+
+                 (update-in state [:angle] + angle-increment)
 
-          ; Do nothing
-          (recur more-instructions state))))))
+                 ; In the default case, do nothing
+                 state))))))
+
+
 
 (defn main-panel
   [& contents]
