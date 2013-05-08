@@ -12,13 +12,13 @@ game.run()
 #
 #	Pausing crap
 #
-pauseButton = document.getElementById('pause')
+$pauseButton = $('#pause')
 
 togglePause = ->
 	game.togglePause()
-	pauseButton.innerText = if game.isPaused then "unpause" else "pause"
+	$pauseButton.text(if game.isPaused then "unpause" else "pause")
 
-pauseButton.onclick = togglePause
+$pauseButton.click togglePause
 
-document.body.onkeypress = (e) ->
+$('body').keypress (e) ->
 	togglePause() if e.which is 13
