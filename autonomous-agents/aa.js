@@ -3,7 +3,10 @@
   var $pauseButton, canvas, entity, game, settings, togglePause;
 
   settings = {
-    drawBoundingSphere: false
+    drawBoundingSphere: false,
+    entity: {
+      invMass: 10
+    }
   };
 
   canvas = new Canvas("aa");

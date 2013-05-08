@@ -2,13 +2,19 @@
 (function() {
 
   window.addSettingsPanel = function(settings) {
-    var $drawBoundingSphere, $settings;
+    var $drawBoundingSphere, $invMass, $settings;
     $settings = $('#settings');
     $drawBoundingSphere = $('<input type="checkbox">');
     $drawBoundingSphere.change(function() {
       return settings.drawBoundingSphere = $(this).is(':checked');
     });
-    return $settings.append($drawBoundingSphere).append('Draw bounding sphere');
+    $settings.append($drawBoundingSphere).append('Draw bounding sphere<br/>');
+    $invMass = $('<input type="range" min="-1" max="2" step="0.25" value="1">');
+    $invMass.change(function() {
+      console.log(Math.pow(10, $(this).val()));
+      return settings.entity.invMass = Math.pow(10, $(this).val());
+    });
+    return $settings.append('Inverse mass: ').append($invMass).append('<br/>');
   };
 
 }).call(this);

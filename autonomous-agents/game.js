@@ -6,9 +6,9 @@
 
     function Entity(game, initialX, initialY) {
       this.game = game;
+      this.entitySettings = this.game.settings.entity;
       this.pos = new Vec2(initialX, initialY);
       this.vel = new Vec2;
-      this.invMass = 50;
       this.maxSpeed = 150;
       this.maxTurnRate = 1;
       this.steerer = new Steerer(game, this, 20);
@@ -18,7 +18,7 @@
 
     Entity.prototype.update = function(timeDelta) {
       var acceleration;
-      acceleration = this.steerer.force().scaleBy(this.invMass);
+      acceleration = this.steerer.force().scaleBy(this.entitySettings.invMass);
       this.vel = this.vel.plus(acceleration.scaleBy(timeDelta)).clamp(this.maxSpeed);
       this.pos = this.pos.plus(this.vel.scaleBy(timeDelta));
       if (this.vel.lengthSquared() > 0.0000001) {

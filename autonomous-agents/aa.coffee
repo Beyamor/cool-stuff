@@ -1,5 +1,8 @@
 settings = {
-	drawBoundingSphere: false
+	drawBoundingSphere: false,
+	entity: {
+		invMass: 10
+	}
 }
 
 canvas	= new Canvas("aa")
