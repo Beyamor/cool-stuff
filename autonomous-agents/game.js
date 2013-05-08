@@ -9,14 +9,13 @@
       this.settings = settings;
       this.pos = new Vec2(initialX, initialY);
       this.vel = new Vec2;
-      this.steerer = new Steerer(game, settings, this, 20);
       this.heading = 0;
       this.radius = 32;
     }
 
     Entity.prototype.update = function(timeDelta) {
       var acceleration;
-      acceleration = this.steerer.force().scaleBy(this.settings.forEntity.invMass);
+      acceleration = this.settings.steerer.force(this, this.game.mousePos).scaleBy(this.settings.forEntity.invMass);
       this.vel = this.vel.plus(acceleration.scaleBy(timeDelta)).clamp(this.settings.forEntity.maxSpeed);
       this.pos = this.pos.plus(this.vel.scaleBy(timeDelta));
       if (this.vel.lengthSquared() > 0.0000001) {

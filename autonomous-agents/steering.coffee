@@ -1,30 +1,28 @@
 class Steerer
-	constructor: (@game, @settings, @entity) ->
-		@isOn = {
-			seek:	false
-			arrive:	true
-		}
+	constructor: (@settings) ->
 
-	force: ->
+	maxSpeed: ->
+		@settings.forEntity.maxSpeed
+
+	maxForce: ->
+		@settings.forSteering.maxForce
+
+class window.Seeker extends Steerer
+	force: (entity, targetPos) ->
+		toTarget	= targetPos.minus(entity.pos)
+		desiredVelocity	= toTarget.normal().scaleBy(@maxSpeed())
+		force		= desiredVelocity.minus(entity.vel)
+		return force.clamp(@maxForce())
+
+class window.Arriver extends Steerer
+	force: (entity, targetPos) ->
 		force		= new Vec2
-		targetPos	= @game.mousePos
-		toTarget	= targetPos.minus(@entity.pos)
-		maxSpeed	= @settings.forEntity.maxSpeed
-		maxForce	= @settings.forSteering.maxForce
+		toTarget	= targetPos.minus(entity.pos)
+		distance	= toTarget.length()
 
-		# Seek
-		if @isOn["seek"]
-			desiredVelocity	= toTarget.normal().scaleBy(maxSpeed)
-			force		= desiredVelocity.minus(@entity.vel)
+		if distance > 0
+			speed		= Math.min(@maxSpeed(), distance)
+			desiredVelocity	= toTarget.normal().scaleBy(speed)
+			force		= desiredVelocity.minus(entity.vel)
 
-		# Arrive
-		if @isOn["arrive"]
-			distance	= toTarget.length()
-
-			if distance > 0
-				speed		= Math.min(maxSpeed, distance)
-				desiredVelocity	= toTarget.normal().scaleBy(speed)
-				force		= desiredVelocity.minus(@entity.vel)
-
-		return force.clamp(maxForce)
-window.Steerer = Steerer
+		return force.clamp(@maxForce())

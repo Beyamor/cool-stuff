@@ -20,3 +20,12 @@ window.addSettingsPanel = (settings) ->
 	$maxForce.change ->
 		settings.forSteering.maxForce = $(this).val()
 	$settings.append('Max force: ').append($maxForce).append('<br/>')
+
+	$seeker = $('<select></select>')
+	$seeker.append("<option value\"#{option}\">#{option}</option>") for option in ['Seek', 'Arrive']
+	$seeker.change ->
+		settings.steerer =\
+			switch $(this).val()
+				when 'Seek' then new Seeker settings
+				when 'Arrive' then new Arriver settings
+	$settings.append('Steering: ').append($seeker).append('<br/>')

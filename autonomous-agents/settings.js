@@ -2,7 +2,7 @@
 (function() {
 
   window.addSettingsPanel = function(settings) {
-    var $drawBoundingSphere, $invMass, $maxForce, $maxSpeed, $settings;
+    var $drawBoundingSphere, $invMass, $maxForce, $maxSpeed, $seeker, $settings, option, _i, _len, _ref;
     $settings = $('#settings');
     $drawBoundingSphere = $('<input type="checkbox">');
     $drawBoundingSphere.change(function() {
@@ -23,7 +23,24 @@
     $maxForce.change(function() {
       return settings.forSteering.maxForce = $(this).val();
     });
-    return $settings.append('Max force: ').append($maxForce).append('<br/>');
+    $settings.append('Max force: ').append($maxForce).append('<br/>');
+    $seeker = $('<select></select>');
+    _ref = ['Seek', 'Arrive'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      option = _ref[_i];
+      $seeker.append("<option value\"" + option + "\">" + option + "</option>");
+    }
+    $seeker.change(function() {
+      return settings.steerer = (function() {
+        switch ($(this).val()) {
+          case 'Seek':
+            return new Seeker(settings);
+          case 'Arrive':
+            return new Arriver(settings);
+        }
+      }).call(this);
+    });
+    return $settings.append('Steering: ').append($seeker).append('<br/>');
   };
 
 }).call(this);

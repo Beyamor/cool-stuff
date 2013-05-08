@@ -13,6 +13,8 @@ canvas	= new Canvas("aa")
 game	= new Game(canvas, settings)
 entity	= new Entity(game, settings, canvas.width/2, canvas.height/2)
 
+settings.steerer = new Seeker settings
+
 game.entities.push(entity)
 game.run()
 

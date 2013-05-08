@@ -2,12 +2,11 @@ class Entity
 	constructor: (@game, @settings, initialX, initialY) ->
 		@pos		= new Vec2 initialX, initialY
 		@vel 		= new Vec2
-		@steerer	= new Steerer game, settings, this
 		@heading	= 0
 		@radius		= 32
 
 	update: (timeDelta) ->
-		acceleration	= @steerer.force().scaleBy(@settings.forEntity.invMass)
+		acceleration	= @settings.steerer.force(this, @game.mousePos).scaleBy(@settings.forEntity.invMass)
 		@vel		= @vel.plus(acceleration.scaleBy(timeDelta)).clamp(@settings.forEntity.maxSpeed)
 		@pos		= @pos.plus(@vel.scaleBy(timeDelta))
 
