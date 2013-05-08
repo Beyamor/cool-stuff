@@ -16,3 +16,10 @@
 	font-weight: bold;
 	cursor: pointer;
 }
+
+div {
+	display: inline;
+	position: absolute;
+	top: 20px;
+	left: 650px;
+}

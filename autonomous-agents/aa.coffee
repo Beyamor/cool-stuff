@@ -1,5 +1,5 @@
 settings = {
-	drawBoundingSphere: true
+	drawBoundingSphere: false
 }
 
 canvas	= new Canvas("aa")
@@ -22,3 +22,9 @@ $pauseButton.click togglePause
 
 $('body').keypress (e) ->
 	togglePause() if e.which is 13
+
+#
+#	Settings
+#
+$('#drawBoundingSphere').change ->
+	settings.drawBoundingSphere = $(this).is(':checked')

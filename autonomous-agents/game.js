@@ -93,10 +93,9 @@
         previousTime = currentTime;
         currentTime = new Date().getTime() / 1000;
         timeDelta = currentTime - previousTime;
-        if (_this.isPaused) {
-          return;
+        if (!_this.isPaused) {
+          _this.update(timeDelta);
         }
-        _this.update(timeDelta);
         return _this.draw();
       }, 16);
     };

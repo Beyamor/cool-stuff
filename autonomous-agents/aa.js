@@ -3,7 +3,7 @@
   var $pauseButton, canvas, entity, game, settings, togglePause;
 
   settings = {
-    drawBoundingSphere: true
+    drawBoundingSphere: false
   };
 
   canvas = new Canvas("aa");
@@ -29,6 +29,10 @@
     if (e.which === 13) {
       return togglePause();
     }
+  });
+
+  $('#drawBoundingSphere').change(function() {
+    return settings.drawBoundingSphere = $(this).is(':checked');
   });
 
 }).call(this);

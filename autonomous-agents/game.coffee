@@ -60,9 +60,7 @@ class Game
 			currentTime	= new Date().getTime() / 1000
 			timeDelta	= currentTime - previousTime
 
-			return if @isPaused
-
-			@update(timeDelta)
+			@update(timeDelta) unless @isPaused
 			@draw()
 		, 16)
 
