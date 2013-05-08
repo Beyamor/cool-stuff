@@ -177,6 +177,12 @@ game.run()
 #	Pausing crap
 #
 pauseButton = document.getElementById('pause')
-pauseButton.onclick = -> game.togglePause()
 
-document.body.onkeypress = (e) -> game.togglePause() if e.which is 13
+togglePause = ->
+	game.togglePause()
+	pauseButton.innerText = if game.isPaused then "unpause" else "pause"
+
+pauseButton.onclick = togglePause
+
+document.body.onkeypress = (e) ->
+	togglePause() if e.which is 13
