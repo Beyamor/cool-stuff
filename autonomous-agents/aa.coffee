@@ -135,6 +135,7 @@ class Entity
 
 class Game
 	constructor: (@canvas) ->
+		@isPaused = false
 		@entities = []
 
 		@mousePos = new Vec2
@@ -156,9 +157,14 @@ class Game
 			currentTime	= new Date().getTime() / 1000
 			timeDelta	= currentTime - previousTime
 
+			return if @isPaused
+
 			@update(timeDelta)
 			@draw()
 		, 16)
+
+	togglePause: ->
+		@isPaused = !@isPaused
 
 canvas	= new Canvas("aa")
 game	= new Game(canvas)
@@ -166,3 +172,11 @@ entity	= new Entity(game, canvas.width/2, canvas.height/2)
 
 game.entities.push(entity)
 game.run()
+
+#
+#	Pausing crap
+#
+pauseButton = document.getElementById('pause')
+pauseButton.onclick = -> game.togglePause()
+
+document.body.onkeypress = (e) -> game.togglePause() if e.which is 13
