@@ -26,5 +26,4 @@ $('body').keypress (e) ->
 #
 #	Settings
 #
-$('#drawBoundingSphere').change ->
-	settings.drawBoundingSphere = $(this).is(':checked')
+addSettingsPanel(settings)

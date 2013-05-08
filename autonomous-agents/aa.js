@@ -31,8 +31,6 @@
     }
   });
 
-  $('#drawBoundingSphere').change(function() {
-    return settings.drawBoundingSphere = $(this).is(':checked');
-  });
+  addSettingsPanel(settings);
 
 }).call(this);

@@ -17,7 +17,7 @@
 	cursor: pointer;
 }
 
-div {
+#settings {
 	display: inline;
 	position: absolute;
 	top: 20px;
