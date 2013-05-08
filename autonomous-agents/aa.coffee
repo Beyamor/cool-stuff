@@ -11,6 +11,9 @@ class Vec2
 	plus: (other) ->
 		new Vec2 @x + other.x, @y + other.y
 
+	minus: (other) ->
+		new Vec2 @x - other.x, @y - other.y
+
 	lengthSquared: ->
 		@x*@x + @y*@y
 
@@ -60,18 +63,28 @@ class Canvas
 		@drawRect(0, 0, @width, @height, @clearColor)
 
 class Steerer
+	constructor: (@game, @entity, @maxForce) ->
+		@seekIsOn = true
+
 	force: ->
-		return new Vec2(1, 0)
+		force = new Vec2
+
+		# Seek
+		if @seekIsOn
+			targetPos	= @game.mousePos
+			desiredVelocity	= targetPos.minus(@entity.pos).scaleBy(@entity.maxSpeed)
+			force		= desiredVelocity.minus(@entity.vel)
+
+		return force.clamp(@maxForce)
 
 class Entity
-	constructor: (initialX, initialY) ->
+	constructor: (game, initialX, initialY) ->
 		@pos		= new Vec2 initialX, initialY
 		@vel 		= new Vec2
 		@invMass	= 1
-		@maxSpeed	= 10
-		@maxForce	= 10
+		@maxSpeed	= 2
 		@maxTurnRate	= 1
-		@steerer	= new Steerer
+		@steerer	= new Steerer game, this, 5
 		@heading	= 0
 		@radius		= 32
 
@@ -80,8 +93,8 @@ class Entity
 		@vel		= @vel.plus(acceleration.scaleBy(timeDelta)).clamp(@maxSpeed)
 		@pos		= @pos.plus(@vel)
 
-		if (@vel.lengthSquared() > 0.0001)
-			@heading	= @vel.direction()
+		if @vel.lengthSquared() > 0.0000001
+			@heading = @vel.direction()
 
 	draw: (canvas) ->
 		x = @pos.x
@@ -91,28 +104,46 @@ class Entity
 			canvas.outlineCircle x, y, @radius, "grey"
 
 		headLength	= @radius
-		tailLength	= @radius
+		tailLength	= @radius - 5
 		tailAngle	= 2.2
 
 		canvas.drawTriangle(
-			[x + Math.cos(@heading) * headLength,			y - Math.sin(@heading) * headLength		],
-			[x + Math.cos(@heading - tailAngle) * tailLength,	y - Math.sin(@heading - tailAngle) * tailLength	],
-			[x + Math.cos(@heading + tailAngle) * tailLength,	y - Math.sin(@heading + tailAngle)* tailLength	],
+			[x + Math.cos(@heading) * headLength,			y + Math.sin(@heading) * headLength		],
+			[x + Math.cos(@heading - tailAngle) * tailLength,	y + Math.sin(@heading - tailAngle) * tailLength	],
+			[x + Math.cos(@heading + tailAngle) * tailLength,	y + Math.sin(@heading + tailAngle)* tailLength	],
 			"black"
 		)
 
-canvas = new Canvas "aa"
-entity = new Entity(canvas.width/2, canvas.height/2)
+class Game
+	constructor: (@canvas) ->
+		@entities = []
 
-currentTime = new Date().getTime() / 1000
-setInterval(->
+		@mousePos = new Vec2
+		@canvas.el.addEventListener 'mousemove', (e) =>
+			rect		= @canvas.el.getBoundingClientRect()
+			@mousePos	= new Vec2(e.clientX - rect.left, e.clientY - rect.top)
 
-	previousTime	= currentTime
-	currentTime	= new Date().getTime() / 1000
-	timeDelta	= currentTime - previousTime
+	update: (timeDelta) ->
+		entity.update(timeDelta) for entity in @entities
 
-	entity.update(timeDelta)
+	draw: ->
+		canvas.clear()
+		entity.draw(@canvas) for entity in @entities
 
-	canvas.clear()
-	entity.draw(canvas)
-, 16)
+	run: ->
+		currentTime = new Date().getTime() / 1000
+		setInterval(=>
+			previousTime	= currentTime
+			currentTime	= new Date().getTime() / 1000
+			timeDelta	= currentTime - previousTime
+
+			@update(timeDelta)
+			@draw()
+		, 16)
+
+canvas	= new Canvas("aa")
+game	= new Game(canvas)
+entity	= new Entity(game, canvas.width/2, canvas.height/2)
+
+game.entities.push(entity)
+game.run()
