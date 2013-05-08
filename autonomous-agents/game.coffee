@@ -1,17 +1,14 @@
 class Entity
-	constructor: (@game, initialX, initialY) ->
-		@entitySettings	= @game.settings.entity
+	constructor: (@game, @settings, initialX, initialY) ->
 		@pos		= new Vec2 initialX, initialY
 		@vel 		= new Vec2
-		@maxSpeed	= 150
-		@maxTurnRate	= 1
-		@steerer	= new Steerer game, this, 20
+		@steerer	= new Steerer game, settings, this
 		@heading	= 0
 		@radius		= 32
 
 	update: (timeDelta) ->
-		acceleration	= @steerer.force().scaleBy(@entitySettings.invMass)
-		@vel		= @vel.plus(acceleration.scaleBy(timeDelta)).clamp(@maxSpeed)
+		acceleration	= @steerer.force().scaleBy(@settings.forEntity.invMass)
+		@vel		= @vel.plus(acceleration.scaleBy(timeDelta)).clamp(@settings.forEntity.maxSpeed)
 		@pos		= @pos.plus(@vel.scaleBy(timeDelta))
 
 		if @vel.lengthSquared() > 0.0000001

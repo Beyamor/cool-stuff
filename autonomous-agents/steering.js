@@ -4,10 +4,10 @@
 
   Steerer = (function() {
 
-    function Steerer(game, entity, maxForce) {
+    function Steerer(game, settings, entity) {
       this.game = game;
+      this.settings = settings;
       this.entity = entity;
-      this.maxForce = maxForce;
       this.isOn = {
         seek: false,
         arrive: true
@@ -15,23 +15,25 @@
     }
 
     Steerer.prototype.force = function() {
-      var desiredVelocity, distance, force, speed, targetPos, toTarget;
+      var desiredVelocity, distance, force, maxForce, maxSpeed, speed, targetPos, toTarget;
       force = new Vec2;
       targetPos = this.game.mousePos;
       toTarget = targetPos.minus(this.entity.pos);
+      maxSpeed = this.settings.forEntity.maxSpeed;
+      maxForce = this.settings.forSteering.maxForce;
       if (this.isOn["seek"]) {
-        desiredVelocity = toTarget.normal().scaleBy(this.entity.maxSpeed);
+        desiredVelocity = toTarget.normal().scaleBy(maxSpeed);
         force = desiredVelocity.minus(this.entity.vel);
       }
       if (this.isOn["arrive"]) {
         distance = toTarget.length();
         if (distance > 0) {
-          speed = Math.min(this.entity.maxSpeed, distance);
+          speed = Math.min(maxSpeed, distance);
           desiredVelocity = toTarget.normal().scaleBy(speed);
           force = desiredVelocity.minus(this.entity.vel);
         }
       }
-      return force.clamp(this.maxForce);
+      return force.clamp(maxForce);
     };
 
     return Steerer;

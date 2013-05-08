@@ -2,7 +2,7 @@
 (function() {
 
   window.addSettingsPanel = function(settings) {
-    var $drawBoundingSphere, $invMass, $settings;
+    var $drawBoundingSphere, $invMass, $maxForce, $maxSpeed, $settings;
     $settings = $('#settings');
     $drawBoundingSphere = $('<input type="checkbox">');
     $drawBoundingSphere.change(function() {
@@ -11,10 +11,19 @@
     $settings.append($drawBoundingSphere).append('Draw bounding sphere<br/>');
     $invMass = $('<input type="range" min="-1" max="2" step="0.25" value="1">');
     $invMass.change(function() {
-      console.log(Math.pow(10, $(this).val()));
-      return settings.entity.invMass = Math.pow(10, $(this).val());
+      return settings.forEntity.invMass = Math.pow(10, $(this).val());
     });
-    return $settings.append('Inverse mass: ').append($invMass).append('<br/>');
+    $settings.append('Inverse mass: ').append($invMass).append('<br/>');
+    $maxSpeed = $('<input type="range" min="50" max="400" step="50" value="150">');
+    $maxSpeed.change(function() {
+      return settings.forEntity.maxSpeed = $(this).val();
+    });
+    $settings.append('Max speed: ').append($maxSpeed).append('<br/>');
+    $maxForce = $('<input type="range" min="10" max="150" step="10" value="50">');
+    $maxForce.change(function() {
+      return settings.forSteering.maxForce = $(this).val();
+    });
+    return $settings.append('Max force: ').append($maxForce).append('<br/>');
   };
 
 }).call(this);

@@ -1,13 +1,17 @@
 settings = {
 	drawBoundingSphere: false,
-	entity: {
-		invMass: 10
+	forEntity: {
+		invMass: 10,
+		maxSpeed: 150
+	},
+	forSteering: {
+		maxForce: 50
 	}
 }
 
 canvas	= new Canvas("aa")
 game	= new Game(canvas, settings)
-entity	= new Entity(game, canvas.width/2, canvas.height/2)
+entity	= new Entity(game, settings, canvas.width/2, canvas.height/2)
 
 game.entities.push(entity)
 game.run()

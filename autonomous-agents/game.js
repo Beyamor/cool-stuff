@@ -4,22 +4,20 @@
 
   Entity = (function() {
 
-    function Entity(game, initialX, initialY) {
+    function Entity(game, settings, initialX, initialY) {
       this.game = game;
-      this.entitySettings = this.game.settings.entity;
+      this.settings = settings;
       this.pos = new Vec2(initialX, initialY);
       this.vel = new Vec2;
-      this.maxSpeed = 150;
-      this.maxTurnRate = 1;
-      this.steerer = new Steerer(game, this, 20);
+      this.steerer = new Steerer(game, settings, this, 20);
       this.heading = 0;
       this.radius = 32;
     }
 
     Entity.prototype.update = function(timeDelta) {
       var acceleration;
-      acceleration = this.steerer.force().scaleBy(this.entitySettings.invMass);
-      this.vel = this.vel.plus(acceleration.scaleBy(timeDelta)).clamp(this.maxSpeed);
+      acceleration = this.steerer.force().scaleBy(this.settings.forEntity.invMass);
+      this.vel = this.vel.plus(acceleration.scaleBy(timeDelta)).clamp(this.settings.forEntity.maxSpeed);
       this.pos = this.pos.plus(this.vel.scaleBy(timeDelta));
       if (this.vel.lengthSquared() > 0.0000001) {
         return this.heading = this.vel.direction();
