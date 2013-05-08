@@ -49,6 +49,14 @@
       }
     };
 
+    Vec2.prototype.isZero = function() {
+      return this.x === 0 && this.y === 0;
+    };
+
+    Vec2.prototype.normal = function() {
+      return this.scaleBy(1 / this.length());
+    };
+
     return Vec2;
 
   })();
@@ -103,16 +111,28 @@
       this.game = game;
       this.entity = entity;
       this.maxForce = maxForce;
-      this.seekIsOn = true;
+      this.isOn = {
+        seek: false,
+        arrive: true
+      };
     }
 
     Steerer.prototype.force = function() {
-      var desiredVelocity, force, targetPos;
+      var desiredVelocity, distance, force, speed, targetPos, toTarget;
       force = new Vec2;
-      if (this.seekIsOn) {
-        targetPos = this.game.mousePos;
-        desiredVelocity = targetPos.minus(this.entity.pos).scaleBy(this.entity.maxSpeed);
+      targetPos = this.game.mousePos;
+      toTarget = targetPos.minus(this.entity.pos);
+      if (this.isOn["seek"]) {
+        desiredVelocity = toTarget.normal().scaleBy(this.entity.maxSpeed);
         force = desiredVelocity.minus(this.entity.vel);
+      }
+      if (this.isOn["arrive"]) {
+        distance = toTarget.length();
+        if (distance > 0) {
+          speed = Math.min(this.entity.maxSpeed, distance);
+          desiredVelocity = toTarget.normal().scaleBy(speed);
+          force = desiredVelocity.minus(this.entity.vel);
+        }
       }
       return force.clamp(this.maxForce);
     };
@@ -126,10 +146,10 @@
     function Entity(game, initialX, initialY) {
       this.pos = new Vec2(initialX, initialY);
       this.vel = new Vec2;
-      this.invMass = 1;
-      this.maxSpeed = 2;
+      this.invMass = 50;
+      this.maxSpeed = 150;
       this.maxTurnRate = 1;
-      this.steerer = new Steerer(game, this, 5);
+      this.steerer = new Steerer(game, this, 20);
       this.heading = 0;
       this.radius = 32;
     }
@@ -138,7 +158,7 @@
       var acceleration;
       acceleration = this.steerer.force().scaleBy(this.invMass);
       this.vel = this.vel.plus(acceleration.scaleBy(timeDelta)).clamp(this.maxSpeed);
-      this.pos = this.pos.plus(this.vel);
+      this.pos = this.pos.plus(this.vel.scaleBy(timeDelta));
       if (this.vel.lengthSquared() > 0.0000001) {
         return this.heading = this.vel.direction();
       }

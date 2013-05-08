@@ -32,6 +32,12 @@ class Vec2
 		else
 			@scaleBy(maxLength / @length())
 
+	isZero: ->
+		@x == 0 && @y == 0
+
+	normal: ->
+		@scaleBy(1 / @length())
+
 class Canvas
 	constructor: (id) ->
 		@el		= document.getElementById(id)
@@ -64,16 +70,29 @@ class Canvas
 
 class Steerer
 	constructor: (@game, @entity, @maxForce) ->
-		@seekIsOn = true
+		@isOn = {
+			seek:	false
+			arrive:	true
+		}
 
 	force: ->
-		force = new Vec2
+		force		= new Vec2
+		targetPos	= @game.mousePos
+		toTarget	= targetPos.minus(@entity.pos)
 
 		# Seek
-		if @seekIsOn
-			targetPos	= @game.mousePos
-			desiredVelocity	= targetPos.minus(@entity.pos).scaleBy(@entity.maxSpeed)
+		if @isOn["seek"]
+			desiredVelocity	= toTarget.normal().scaleBy(@entity.maxSpeed)
 			force		= desiredVelocity.minus(@entity.vel)
+
+		# Arrive
+		if @isOn["arrive"]
+			distance	= toTarget.length()
+
+			if distance > 0
+				speed		= Math.min(@entity.maxSpeed, distance)
+				desiredVelocity	= toTarget.normal().scaleBy(speed)
+				force		= desiredVelocity.minus(@entity.vel)
 
 		return force.clamp(@maxForce)
 
@@ -81,17 +100,17 @@ class Entity
 	constructor: (game, initialX, initialY) ->
 		@pos		= new Vec2 initialX, initialY
 		@vel 		= new Vec2
-		@invMass	= 1
-		@maxSpeed	= 2
+		@invMass	= 50
+		@maxSpeed	= 150
 		@maxTurnRate	= 1
-		@steerer	= new Steerer game, this, 5
+		@steerer	= new Steerer game, this, 20
 		@heading	= 0
 		@radius		= 32
 
 	update: (timeDelta) ->
 		acceleration	= @steerer.force().scaleBy(@invMass)
 		@vel		= @vel.plus(acceleration.scaleBy(timeDelta)).clamp(@maxSpeed)
-		@pos		= @pos.plus(@vel)
+		@pos		= @pos.plus(@vel.scaleBy(timeDelta))
 
 		if @vel.lengthSquared() > 0.0000001
 			@heading = @vel.direction()
