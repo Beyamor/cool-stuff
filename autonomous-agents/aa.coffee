@@ -5,6 +5,30 @@ programSettings = {
 class Vec2
 	constructor: (@x=0, @y=0) ->
 
+	clone: ->
+		new Vec2 @x, @y
+
+	plus: (other) ->
+		new Vec2 @x + other.x, @y + other.y
+
+	lengthSquared: ->
+		@x*@x + @y*@y
+
+	length: ->
+		Math.sqrt(@lengthSquared())
+
+	direction: ->
+		Math.atan2(@y, @x)
+
+	scaleBy: (scale) ->
+		new Vec2 @x*scale, @y*scale
+
+	clamp: (maxLength) ->
+		if @lengthSquared() <= maxLength*maxLength
+			@clone()
+		else
+			@scaleBy(maxLength / @length())
+
 class Canvas
 	constructor: (id) ->
 		@el		= document.getElementById(id)
@@ -80,7 +104,15 @@ class Entity
 canvas = new Canvas "aa"
 entity = new Entity(canvas.width/2, canvas.height/2)
 
+currentTime = new Date().getTime() / 1000
 setInterval(->
+
+	previousTime	= currentTime
+	currentTime	= new Date().getTime() / 1000
+	timeDelta	= currentTime - previousTime
+
+	entity.update(timeDelta)
+
 	canvas.clear()
 	entity.draw(canvas)
 , 16)
