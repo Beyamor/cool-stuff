@@ -56,7 +56,7 @@
       toTarget = targetPos.minus(entity.pos);
       distance = toTarget.length();
       if (distance > 0) {
-        speed = Math.min(this.maxSpeed(), distance);
+        speed = Math.min(this.maxSpeed(), distance * this.settings.forSteering.decceleration);
         desiredVelocity = toTarget.normal().scaleBy(speed);
         force = desiredVelocity.minus(entity.vel);
       }

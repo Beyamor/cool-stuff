@@ -32,24 +32,30 @@
       $seeker.append("<option value\"" + option + "\">" + option + "</option>");
     }
     $seeker.change(function() {
-      var $distanceControl, $jitterControl, $radiusControl;
+      var $deccelerationControl, $distanceControl, $jitterControl, $radiusControl;
       $seekerSettings.empty();
       switch ($(this).val()) {
         case 'Seek':
           return settings.steerer = new Seeker(settings);
         case 'Arrive':
-          return settings.steerer = new Arriver(settings);
+          settings.steerer = new Arriver(settings);
+          $deccelerationControl = $('<input type="range" value="0" min="-1" max="1" step="0.2">');
+          $deccelerationControl.change(function() {
+            return settings.forSteering.decceleration = Math.pow(10, $(this).val());
+          });
+          $seekerSettings.append('Deceleration coefficient: 0.1').append($deccelerationControl).append('10<br/>');
+          return settings.forSteering.decceleration = 1;
         case 'Wander':
           settings.steerer = new Wanderer(settings);
           $radiusControl = $('<input type="range" min="5" max="50" step="5" value="25">');
           $radiusControl.change(function() {
-            return seetings.forSteering.wanderRadius = $(this).val();
+            return settings.forSteering.wanderRadius = $(this).val();
           });
           $seekerSettings.append('Wander radius: 5').append($radiusControl).append('50<br/>');
           settings.forSteering.wanderRadius = 25;
           $distanceControl = $('<input type="range" min="5" max="100" step="5" value="50">');
           $distanceControl.change(function() {
-            return seetings.forSteering.wanderDistance = $(this).val();
+            return settings.forSteering.wanderDistance = $(this).val();
           });
           $seekerSettings.append('Wander distance: 5').append($distanceControl).append('100<br/>');
           settings.forSteering.wanderDistance = 50;

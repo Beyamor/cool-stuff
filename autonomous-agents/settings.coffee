@@ -34,20 +34,28 @@ window.addSettingsPanel = (settings) ->
 		switch $(this).val()
 			when 'Seek'
 				settings.steerer = new Seeker(settings)
+
 			when 'Arrive'
 				settings.steerer = new Arriver(settings)
+
+				$deccelerationControl = $('<input type="range" value="0" min="-1" max="1" step="0.2">')
+				$deccelerationControl.change ->
+					settings.forSteering.decceleration = Math.pow(10, $(this).val())
+				$seekerSettings.append('Deceleration coefficient: 0.1').append($deccelerationControl).append('10<br/>')
+				settings.forSteering.decceleration = 1
+
 			when 'Wander'
 				settings.steerer = new Wanderer(settings)
 
 				$radiusControl = $('<input type="range" min="5" max="50" step="5" value="25">')
 				$radiusControl.change ->
-					seetings.forSteering.wanderRadius = $(this).val()
+					settings.forSteering.wanderRadius = $(this).val()
 				$seekerSettings.append('Wander radius: 5').append($radiusControl).append('50<br/>')
 				settings.forSteering.wanderRadius = 25
 
 				$distanceControl = $('<input type="range" min="5" max="100" step="5" value="50">')
 				$distanceControl.change ->
-					seetings.forSteering.wanderDistance = $(this).val()
+					settings.forSteering.wanderDistance = $(this).val()
 				$seekerSettings.append('Wander distance: 5' ).append($distanceControl).append('100<br/>')
 				settings.forSteering.wanderDistance = 50
 
