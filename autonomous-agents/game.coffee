@@ -1,4 +1,4 @@
-class Entity
+class Vehicle
 	constructor: (@game, @settings, initialX, initialY) ->
 		@pos		= new Vec2 initialX, initialY
 		@vel 		= new Vec2
@@ -30,7 +30,7 @@ class Entity
 			[x + Math.cos(@heading + tailAngle) * tailLength,	y + Math.sin(@heading + tailAngle)* tailLength	],
 			"black"
 		)
-window.Entity = Entity
+window.Vehicle = Vehicle
 
 class Game
 	constructor: (@canvas, @settings) ->

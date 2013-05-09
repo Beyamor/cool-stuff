@@ -11,7 +11,7 @@ settings = {
 
 canvas	= new Canvas("aa")
 game	= new Game(canvas, settings)
-entity	= new Entity(game, settings, canvas.width/2, canvas.height/2)
+entity	= new Vehicle(game, settings, canvas.width/2, canvas.height/2)
 
 settings.steerer = new Seeker settings
 
