@@ -12,7 +12,7 @@ class window.Seeker extends Steerer
 		toTarget	= targetPos.minus(entity.pos)
 		desiredVelocity	= toTarget.normal().scaleBy(@maxSpeed())
 		force		= desiredVelocity.minus(entity.vel)
-		return force.clamp(@maxForce())
+		return force
 
 class window.Arriver extends Steerer
 	force: (entity, targetPos) ->
@@ -25,7 +25,7 @@ class window.Arriver extends Steerer
 			desiredVelocity	= toTarget.normal().scaleBy(speed)
 			force		= desiredVelocity.minus(entity.vel)
 
-		return force.clamp(@maxForce())
+		return force
 
 class window.Wanderer extends Steerer
 	constructor: (@settings) ->
@@ -42,4 +42,4 @@ class window.Wanderer extends Steerer
 		destination	= destination.rotate(entity.vel.direction()).plus(entity.pos)
 
 		force		= destination.minus(entity.pos)
-		return force.clamp(@maxForce())
+		return force

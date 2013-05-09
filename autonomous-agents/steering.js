@@ -35,7 +35,7 @@
       toTarget = targetPos.minus(entity.pos);
       desiredVelocity = toTarget.normal().scaleBy(this.maxSpeed());
       force = desiredVelocity.minus(entity.vel);
-      return force.clamp(this.maxForce());
+      return force;
     };
 
     return Seeker;
@@ -60,7 +60,7 @@
         desiredVelocity = toTarget.normal().scaleBy(speed);
         force = desiredVelocity.minus(entity.vel);
       }
-      return force.clamp(this.maxForce());
+      return force;
     };
 
     return Arriver;
@@ -85,7 +85,7 @@
       destination = new Vec2(wanderDistance + Math.cos(this.angle) * wanderRadius, Math.sin(this.angle) * wanderRadius);
       destination = destination.rotate(entity.vel.direction()).plus(entity.pos);
       force = destination.minus(entity.pos);
-      return force.clamp(this.maxForce());
+      return force;
     };
 
     return Wanderer;

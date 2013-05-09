@@ -38,7 +38,7 @@
 
     Vehicle.prototype.update = function(timeDelta) {
       var acceleration;
-      acceleration = this.settings.steerer.force(this, this.target.pos).scaleBy(this.settings.forEntity.invMass);
+      acceleration = this.settings.steerer.force(this, this.target.pos).clamp(this.settings.forSteering.maxForce).scaleBy(this.settings.forEntity.invMass);
       this.vel = this.vel.plus(acceleration.scaleBy(timeDelta)).clamp(this.settings.forEntity.maxSpeed);
       this.pos = this.pos.plus(this.vel.scaleBy(timeDelta));
       if (this.vel.lengthSquared() > 0.0000001) {

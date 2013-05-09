@@ -17,7 +17,9 @@ class Vehicle extends Entity
 		@heading	= 0
 
 	update: (timeDelta) ->
-		acceleration	= @settings.steerer.force(this, @target.pos).scaleBy(@settings.forEntity.invMass)
+		acceleration	= @settings.steerer.force(this, @target.pos)
+					.clamp(@settings.forSteering.maxForce)
+					.scaleBy(@settings.forEntity.invMass)
 		@vel		= @vel.plus(acceleration.scaleBy(timeDelta)).clamp(@settings.forEntity.maxSpeed)
 		@pos		= @pos.plus(@vel.scaleBy(timeDelta))
 
