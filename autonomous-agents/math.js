@@ -53,6 +53,17 @@
       return this.scaleBy(1 / this.length());
     };
 
+    Vec2.prototype.rotate = function(theta) {
+      var cosTheta, sinTheta;
+      cosTheta = Math.cos(theta);
+      sinTheta = Math.sin(theta);
+      return new Vec2(this.x * cosTheta - this.y * sinTheta, this.x * sinTheta + this.y * cosTheta);
+    };
+
+    Vec2.prototype.toString = function() {
+      return "(" + (Math.floor(this.x)) + ", " + (Math.floor(this.y)) + ")";
+    };
+
     return Vec2;
 
   })();

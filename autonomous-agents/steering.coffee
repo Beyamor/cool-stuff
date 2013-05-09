@@ -26,3 +26,20 @@ class window.Arriver extends Steerer
 			force		= desiredVelocity.minus(entity.vel)
 
 		return force.clamp(@maxForce())
+
+class window.Wanderer extends Steerer
+	constructor: (@settings) ->
+		@angle = 0
+
+	force: (entity, targetPos) ->
+		wanderRadius	= @settings.forSteering.wanderRadius
+		wanderDistance	= @settings.forSteering.wanderDistance
+		jitter		= @settings.forSteering.jitter
+
+		@angle += jitter * Math.random() * (if Math.random() < 0.5 then -1 else 1)
+
+		destination	= new Vec2(wanderDistance + Math.cos(@angle) * wanderRadius, Math.sin(@angle) * wanderRadius)
+		destination	= destination.rotate(entity.vel.direction()).plus(entity.pos)
+
+		force		= destination.minus(entity.pos)
+		return force.clamp(@maxForce())

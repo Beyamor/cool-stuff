@@ -45,6 +45,12 @@ class Game
 	update: (timeDelta) ->
 		entity.update(timeDelta) for entity in @entities
 
+		for entity in @entities
+			if entity.pos.x + entity.radius < 0 then entity.pos.x = @canvas.width
+			if entity.pos.y + entity.radius < 0 then entity.pos.y = @canvas.height
+			if entity.pos.x - entity.radius > @canvas.width then entity.pos.x = 0
+			if entity.pos.y - entity.radius > @canvas.height then entity.pos.y = 0
+
 	draw: ->
 		@canvas.clear()
 		entity.draw(@canvas) for entity in @entities

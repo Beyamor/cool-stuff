@@ -2,7 +2,7 @@
 (function() {
 
   window.addSettingsPanel = function(settings) {
-    var $drawBoundingSphere, $invMass, $maxForce, $maxSpeed, $seeker, $settings, option, _i, _len, _ref;
+    var $drawBoundingSphere, $invMass, $maxForce, $maxSpeed, $seeker, $seekerSettings, $settings, option, _i, _len, _ref;
     $settings = $('#settings');
     $drawBoundingSphere = $('<input type="checkbox">');
     $drawBoundingSphere.change(function() {
@@ -24,23 +24,44 @@
       return settings.forSteering.maxForce = $(this).val();
     });
     $settings.append('Max force: ').append($maxForce).append('<br/>');
+    $seekerSettings = $('<div id="seeker-settings"></div>');
     $seeker = $('<select></select>');
-    _ref = ['Seek', 'Arrive'];
+    _ref = ['Seek', 'Arrive', 'Wander'];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       option = _ref[_i];
       $seeker.append("<option value\"" + option + "\">" + option + "</option>");
     }
     $seeker.change(function() {
-      return settings.steerer = (function() {
-        switch ($(this).val()) {
-          case 'Seek':
-            return new Seeker(settings);
-          case 'Arrive':
-            return new Arriver(settings);
-        }
-      }).call(this);
+      var $distanceControl, $jitterControl, $radiusControl;
+      $seekerSettings.empty();
+      switch ($(this).val()) {
+        case 'Seek':
+          return settings.steerer = new Seeker(settings);
+        case 'Arrive':
+          return settings.steerer = new Arriver(settings);
+        case 'Wander':
+          settings.steerer = new Wanderer(settings);
+          $radiusControl = $('<input type="range" min="5" max="50" step="5" value="25">');
+          $radiusControl.change(function() {
+            return seetings.forSteering.wanderRadius = $(this).val();
+          });
+          $seekerSettings.append('Wander radius: ').append($radiusControl).append('<br/>');
+          settings.forSteering.wanderRadius = 25;
+          $distanceControl = $('<input type="range" min="5" max="100" step="5" value="50">');
+          $distanceControl.change(function() {
+            return seetings.forSteering.wanderDistance = $(this).val();
+          });
+          $seekerSettings.append('Wander distance: ').append($distanceControl).append('<br/>');
+          settings.forSteering.wanderDistance = 50;
+          $jitterControl = $('<input type="range" min="0.1" max="1.2" step="0.1" value="0.2">');
+          $jitterControl.change(function() {
+            return seetings.forSteering.jitter = $(this).val();
+          });
+          $seekerSettings.append('Jitter: ').append($jitterControl).append('<br/>');
+          return settings.forSteering.jitter = 0.2;
+      }
     });
-    return $settings.append('Steering: ').append($seeker).append('<br/>');
+    return $settings.append('Steering: ').append($seeker).append('<br/>').append($seekerSettings);
   };
 
 }).call(this);

@@ -33,4 +33,13 @@ class Vec2
 
 	normal: ->
 		@scaleBy(1 / @length())
+
+	rotate: (theta) ->
+		cosTheta = Math.cos(theta)
+		sinTheta = Math.sin(theta)
+		return new Vec2(@x*cosTheta - @y*sinTheta, @x*sinTheta + @y*cosTheta)
+
+	toString: ->
+		"(#{Math.floor(@x)}, #{Math.floor(@y)})"
+
 window.Vec2 = Vec2

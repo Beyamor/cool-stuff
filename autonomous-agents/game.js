@@ -59,12 +59,30 @@
     }
 
     Game.prototype.update = function(timeDelta) {
-      var entity, _i, _len, _ref, _results;
+      var entity, _i, _j, _len, _len1, _ref, _ref1, _results;
       _ref = this.entities;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        _results.push(entity.update(timeDelta));
+        entity.update(timeDelta);
+      }
+      _ref1 = this.entities;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        entity = _ref1[_j];
+        if (entity.pos.x + entity.radius < 0) {
+          entity.pos.x = this.canvas.width;
+        }
+        if (entity.pos.y + entity.radius < 0) {
+          entity.pos.y = this.canvas.height;
+        }
+        if (entity.pos.x - entity.radius > this.canvas.width) {
+          entity.pos.x = 0;
+        }
+        if (entity.pos.y - entity.radius > this.canvas.height) {
+          _results.push(entity.pos.y = 0);
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     };

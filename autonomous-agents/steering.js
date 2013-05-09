@@ -67,4 +67,29 @@
 
   })(Steerer);
 
+  window.Wanderer = (function(_super) {
+
+    __extends(Wanderer, _super);
+
+    function Wanderer(settings) {
+      this.settings = settings;
+      this.angle = 0;
+    }
+
+    Wanderer.prototype.force = function(entity, targetPos) {
+      var destination, force, jitter, wanderDistance, wanderRadius;
+      wanderRadius = this.settings.forSteering.wanderRadius;
+      wanderDistance = this.settings.forSteering.wanderDistance;
+      jitter = this.settings.forSteering.jitter;
+      this.angle += jitter * Math.random() * (Math.random() < 0.5 ? -1 : 1);
+      destination = new Vec2(wanderDistance + Math.cos(this.angle) * wanderRadius, Math.sin(this.angle) * wanderRadius);
+      destination = destination.rotate(entity.vel.direction()).plus(entity.pos);
+      force = destination.minus(entity.pos);
+      return force.clamp(this.maxForce());
+    };
+
+    return Wanderer;
+
+  })(Steerer);
+
 }).call(this);
