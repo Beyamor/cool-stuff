@@ -11,11 +11,13 @@ settings = {
 
 canvas	= new Canvas("aa")
 game	= new Game(canvas, settings)
-entity	= new Vehicle(game, settings, canvas.width/2, canvas.height/2)
+marker	= new Marker(game, canvas.width * 0.25, canvas.height * 0.25)
+vehicle	= new Vehicle(marker, canvas, canvas.width/2, canvas.height/2, settings)
 
 settings.steerer = new Seeker settings
 
-game.entities.push(entity)
+game.entities.push(vehicle)
+game.entities.push(marker)
 game.run()
 
 #
