@@ -67,3 +67,8 @@
                          [x 1
                           y nil]
                          (+ x y)))))
+
+(deftest do-you-even-lift?
+         (is (= ["1" "2"]
+                (with-monad sequence-m
+                            (m-lift str [1 2])))))

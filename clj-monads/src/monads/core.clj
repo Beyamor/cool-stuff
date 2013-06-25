@@ -30,6 +30,10 @@
                    body
                    (partition 2 bindings))))
 
+(defn m-lift
+  [f mv]
+  (m-bind mv (fn [x] (m-result (f x)))))
+
 (defmonad sequence-m
           {:result (fn [x] [x])
            :bind (fn [xs mf] (mapcat mf xs))
