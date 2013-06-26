@@ -12,3 +12,9 @@
 
 (deftest string=-test
          (is (= [["abc"" def"]] ((string= "abc") "abc def"))))
+
+(deftest group-test
+         (is (= [["ab" "c"]]
+                ((group
+                   (string= "a") (char= \b))
+                   "abc"))))

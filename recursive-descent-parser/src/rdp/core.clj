@@ -1,5 +1,5 @@
 (ns rdp.core
-  (:use [clojure.algo.monads :only [defmonad m-bind m-result domonad with-monad]]))
+  (:use [clojure.algo.monads :only [defmonad m-bind m-result domonad with-monad m-seq]]))
 
 (defmonad parser-m
           [m-result (fn [a] ; takes a value
@@ -49,6 +49,7 @@
 (defn char=
   "Returns a parser that either consumes the given char or fails"
   [c]
+  {:pre [(char? c)]}
   (is? #(= % c)))
 
 (defn string=
@@ -61,3 +62,15 @@
       [_ (char= (first s)) ; if we can parse the first char
        _ (string= (str-rest s))] ; and the rest of the string
       s))) ; return the string
+
+(defn group
+  "Returns a parser that calls a sequence of parsers in series."
+  [& parsers]
+  (if (empty? parsers)
+      (with-monad parser-m (m-result ""))
+    (doparse
+      [c (first parsers)
+       cs (apply group (rest parsers))]
+      (do
+        (println "got" c "and" cs)
+        (str c cs)))))

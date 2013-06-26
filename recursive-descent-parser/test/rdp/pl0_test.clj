@@ -9,16 +9,17 @@
 
 (def block
   (doparse
-    ;[s (group
-    ;     (string= "var") ident (string= ";"))]
-    [s ident]
+    [s (group
+         (string= "var ") ident (string= ";"))]
     s))
 
 (def program
   (doparse
     [b block
      _ (char= \.)]
-    (str b ".")))
+    (do
+      (println "block is" b)
+      (str b "."))))
 
 (defn parse-program
   [program-text]
@@ -27,5 +28,6 @@
       (ffirst parse-results)
       (throw (Exception. "Syntax error in program")))))
 
+(comment
 (deftest can-parse-mimimal-program
-         (is (= "x." (parse-program "x."))))
+         (is (= "var x;." (parse-program "var x;.")))))
