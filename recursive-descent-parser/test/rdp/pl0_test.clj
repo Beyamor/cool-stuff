@@ -2,25 +2,30 @@
   (:use clojure.test
         rdp.core))
 
-(defn block
-  []
+(def ident
   (doparse
-    [s (string= "var")]
+    [x (string= "x")]
+    x))
+
+(def block
+  (doparse
+    ;[s (group
+    ;     (string= "var") ident (string= ";"))]
+    [s ident]
     s))
 
-(defn program
-  []
+(def program
   (doparse
-    [b (block)
+    [b block
      _ (char= \.)]
     (str b ".")))
 
 (defn parse-program
   [program-text]
-  (let [parse-results ((program) program-text)]
+  (let [parse-results (program program-text)]
     (if-not (empty? parse-results)
       (ffirst parse-results)
       (throw (Exception. "Syntax error in program")))))
 
 (deftest can-parse-mimimal-program
-         (is (= "var." (parse-program "var."))))
+         (is (= "x." (parse-program "x."))))
