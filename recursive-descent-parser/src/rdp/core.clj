@@ -26,6 +26,8 @@
             ~bindings
             ~body))
 
+(def failed? empty?)
+
 (defn str-rest
   "Returns rest of s as a string"
   [s]
@@ -71,6 +73,13 @@
     (doparse
       [c (first parsers)
        cs (apply group (rest parsers))]
-      (do
-        (println "got" c "and" cs)
-        (str c cs)))))
+        (str c cs))))
+
+(defn optional
+  "Returns an optional parser."
+  [parser]
+  (fn [s]
+    (let [result (parser s)]
+      (if (failed? result)
+        ((with-monad parser-m (m-result "")) s)
+        result))))

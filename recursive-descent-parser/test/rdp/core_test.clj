@@ -18,3 +18,12 @@
                 ((group
                    (string= "a") (char= \b))
                    "abc"))))
+
+(deftest optional-test
+         (let [parser (doparse
+                        [first-bit (string= "a")
+                         optional-bit (optional (string= "z"))
+                         last-bit (string= "b")]
+                        (str first-bit optional-bit last-bit))]
+           (is (= [["ab" "c"]] (parser "abc")))
+           (is (= [["azb" "c"]] (parser "azbc")))))
