@@ -46,18 +46,18 @@
      :when (p? c)] ; if it doesn't meet the predicate, return m-zero
     c)) ; otherwise, return c
 
-(defn char=?
+(defn char=
   "Returns a parser that either consumes the given char or fails"
   [c]
   (is? #(= % c)))
 
-(defn string=?
+(defn string=
   "Returns a parser that either consumes the given string or fails"
   [s]
   (if (empty? s) ; if we're looking for the empty string
     (with-monad parser-m
                 (m-result "")) ; well, damn, we found it
     (doparse
-      [_ (char=? (first s)) ; if we can parse the first char
-       _ (string=? (str-rest s))] ; and the rest of the string
+      [_ (char= (first s)) ; if we can parse the first char
+       _ (string= (str-rest s))] ; and the rest of the string
       s))) ; return the string

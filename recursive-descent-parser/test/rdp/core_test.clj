@@ -6,9 +6,9 @@
          (is (= [] (item "")))
          (is (= [[\a "bc"]] (item "abc"))))
 
-(deftest char=?-test
-         (is (= [[\a "bc"]] ((char=? \a) "abc")))
-         (is (= [] ((char=? \a) "xyz"))))
+(deftest char=-test
+         (is (= [[\a "bc"]] ((char= \a) "abc")))
+         (is (= [] ((char= \a) "xyz"))))
 
-(deftest string=?-test
-         (is (= [["abc"" def"]] ((string=? "abc") "abc def"))))
+(deftest string=-test
+         (is (= [["abc"" def"]] ((string= "abc") "abc def"))))

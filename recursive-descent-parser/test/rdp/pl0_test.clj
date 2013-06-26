@@ -5,14 +5,14 @@
 (defn block
   []
   (doparse
-    [s (string=? "var")]
+    [s (string= "var")]
     s))
 
 (defn program
   []
   (doparse
     [b (block)
-     _ (char=? \.)]
+     _ (char= \.)]
     (str b ".")))
 
 (defn parse-program
