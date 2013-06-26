@@ -55,11 +55,17 @@
            (test-laws writer-m 1 [2 "nothing"] f g)))
 
 (deftest can-do-seq
-         (is (= [4 5 5 6]) 
-             (domonad sequence-m
-                      [x [1 2]
-                       y [3 4]]
-                      (+ x y))))
+         (is (= [4 5 5 6]
+                (domonad sequence-m
+                         [x [1 2]
+                          y [3 4]]
+                         (+ x y))))
+
+         (is (= ["a1" "a2" "b1" "b2"]
+                (domonad sequence-m
+                         [x ["a" "b"]
+                          y [1 2]]
+                         (str x y)))))
 
 (deftest can-do-maybe
          (is (= nil
