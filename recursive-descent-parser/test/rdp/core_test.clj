@@ -1,7 +1,6 @@
 (ns rdp.core-test
   (:use clojure.test
-        rdp.core
-        [clojure.algo.monads :only [with-monad domonad m-bind m-result]]))
+        rdp.core))
 
 (deftest item-test
          (is (= [] (item "")))

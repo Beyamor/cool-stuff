@@ -20,6 +20,11 @@
                       (apply concat ; combines the parse results
                              (map #(% cs) parsers))))]) ; of all the given parsers
 
+(defmacro doparse
+  [bindings body]
+  `(domonad parser-m
+            ~bindings
+            ~body))
 
 (defn str-rest
   "Returns rest of s as a string"
@@ -36,10 +41,10 @@
 (defn is?
   "Returns a parser that either consumes a char meeting p? or fails"
   [p?]
-  (domonad parser-m
-           [c item ; grab the next item
-            :when (p? c)] ; if it doesn't meet the predicate, return m-zero
-           c)) ; otherwise, return c
+  (doparse
+    [c item ; grab the next item
+     :when (p? c)] ; if it doesn't meet the predicate, return m-zero
+    c)) ; otherwise, return c
 
 (defn char=?
   "Returns a parser that either consumes the given char or fails"
@@ -52,7 +57,7 @@
   (if (empty? s) ; if we're looking for the empty string
     (with-monad parser-m
                 (m-result "")) ; well, damn, we found it
-    (domonad parser-m
-            [_ (char=? (first s)) ; if we can parse the first char
-             _ (string=? (str-rest s))] ; and the rest of the string
-            s))) ; return the string
+    (doparse
+      [_ (char=? (first s)) ; if we can parse the first char
+       _ (string=? (str-rest s))] ; and the rest of the string
+      s))) ; return the string
