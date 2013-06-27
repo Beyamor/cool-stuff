@@ -4,13 +4,13 @@
 
 (def ident
   (doparse
-    [x (string= "x")]
+    [x (str= "x")]
     x))
 
 (def block
   (doparse
     [s (group
-         (string= "var ") ident (string= ";"))]
+         (str= "var ") ident (str= ";"))]
     s))
 
 (def program

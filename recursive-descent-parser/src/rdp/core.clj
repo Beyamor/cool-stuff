@@ -67,7 +67,7 @@
   {:pre [(char? c)]}
   (is? #(= % c)))
 
-(defn string=
+(defn str=
   "Returns a parser that either consumes the given string or fails"
   [s]
   (if (empty? s) ; if we're looking for the empty string
@@ -75,7 +75,7 @@
                 (m-result "")) ; well, damn, we found it
     (doparse
       [_ (char= (first s)) ; if we can parse the first char
-       _ (string= (str-rest s))] ; and the rest of the string
+       _ (str= (str-rest s))] ; and the rest of the string
       s))) ; return the string
 
 (defn group
