@@ -2,15 +2,16 @@
   (:use clojure.test
         rdp.core))
 
+(def whitespace
+  (many+ (is? #{\space \newline})))
+
 (def ident
-  (doparse
-    [x (str= "x")]
-    x))
+  (str= "x"))
 
 (def block
   (doparse
     [s (group
-         (str= "var ") ident (str= ";"))]
+         (str= "var") whitespace ident (str= ";"))]
     s))
 
 (def program
