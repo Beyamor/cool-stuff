@@ -9,16 +9,12 @@
   (str= "x"))
 
 (def block
-  (doparse
-    [s (group
-         (str= "var") whitespace ident (str= ";"))]
-    s))
+  (group
+    (str= "var") whitespace ident (str= ";")))
 
 (def program
-  (doparse
-    [b block
-     _ (char= \.)]
-      (str b ".")))
+  (group
+    block (char= \.)))
 
 (defn parse-program
   [program-text]
