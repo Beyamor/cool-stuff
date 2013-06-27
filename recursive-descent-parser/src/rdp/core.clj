@@ -28,6 +28,17 @@
 (def pass
   (with-monad parser-m (m-result "")))
 
+(defn only-one
+  "Concatentates parsers, selects first result."
+  [& parsers]
+  (let [parser (with-monad parser-m
+                           (apply m-plus parsers))]
+    (fn [s]
+      (let [results (parser s)]
+        (if (empty? results)
+          []
+          [(first results)])))))
+
 (def failed? empty?)
 
 (defn str-rest
@@ -86,10 +97,19 @@
         ((with-monad parser-m (m-result "")) s)
         result))))
 
+(declare many+)
+
 (defn many
   "Repeats some parser 0 or more times"
   [parser]
+  (domonad
+    [cs (only-one (many+ parser) pass)]
+    cs))
+
+(defn many+
+  "Repeats some parser 1 or more times"
+  [parser]
   (doparse
     [c parser
-     cs (optional (many parser))]
+     cs (only-one (many+ parser) pass)]
     (str c cs)))

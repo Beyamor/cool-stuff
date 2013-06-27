@@ -29,4 +29,9 @@
            (is (= [["azb" "c"]] (parser "azbc")))))
 
 (deftest many-test
+         (is (= [["" "b"]] ((many (char= \a)) "b")))
          (is (= [["aaa" "b"]] ((many (char= \a)) "aaab"))))
+
+(deftest many+-test
+         (is (= [["aaa" "b"]] ((many+ (char= \a)) "aaab")))
+         (is (= [] ((many+ (char= \a)) "b"))))
