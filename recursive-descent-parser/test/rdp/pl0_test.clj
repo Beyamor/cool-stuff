@@ -17,9 +17,7 @@
   (doparse
     [b block
      _ (char= \.)]
-    (do
-      (println "block is" b)
-      (str b "."))))
+      (str b ".")))
 
 (defn parse-program
   [program-text]
@@ -28,6 +26,5 @@
       (ffirst parse-results)
       (throw (Exception. "Syntax error in program")))))
 
-(comment
 (deftest can-parse-mimimal-program
-         (is (= "var x;." (parse-program "var x;.")))))
+         (is (= "var x;." (parse-program "var x;."))))

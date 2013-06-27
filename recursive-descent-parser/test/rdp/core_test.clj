@@ -27,3 +27,6 @@
                         (str first-bit optional-bit last-bit))]
            (is (= [["ab" "c"]] (parser "abc")))
            (is (= [["azb" "c"]] (parser "azbc")))))
+
+(deftest many-test
+         (is (= [["aaa" "b"]] ((many (char= \a)) "aaab"))))

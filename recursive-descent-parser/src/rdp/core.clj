@@ -19,12 +19,14 @@
                     (fn [cs] ; returns a parser which
                       (apply concat ; combines the parse results
                              (map #(% cs) parsers))))]) ; of all the given parsers
-
 (defmacro doparse
   [bindings body]
   `(domonad parser-m
             ~bindings
             ~body))
+
+(def pass
+  (with-monad parser-m (m-result "")))
 
 (def failed? empty?)
 
@@ -69,7 +71,7 @@
   "Returns a parser that calls a sequence of parsers in series."
   [& parsers]
   (if (empty? parsers)
-      (with-monad parser-m (m-result ""))
+    pass
     (doparse
       [c (first parsers)
        cs (apply group (rest parsers))]
@@ -83,3 +85,11 @@
       (if (failed? result)
         ((with-monad parser-m (m-result "")) s)
         result))))
+
+(defn many
+  "Repeats some parser 0 or more times"
+  [parser]
+  (doparse
+    [c parser
+     cs (optional (many parser))]
+    (str c cs)))
