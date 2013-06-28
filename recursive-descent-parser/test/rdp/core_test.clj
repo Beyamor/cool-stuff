@@ -17,6 +17,10 @@
          (is (= [["ab" "c"]]
                 ((group
                    (str= "a") (char= \b))
+                   "abc")))
+         (is (= [["ab" "c"]]
+                ((group
+                   "a" (char= \b))
                    "abc"))))
 
 (deftest optional-test

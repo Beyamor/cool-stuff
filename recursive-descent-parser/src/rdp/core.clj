@@ -81,12 +81,13 @@
 (defn group
   "Returns a parser that calls a sequence of parsers in series."
   [& parsers]
-  (if (empty? parsers)
-    pass
-    (doparse
-      [c (first parsers)
-       cs (apply group (rest parsers))]
-        (str c cs))))
+  (let [parsers (map #(if (string? %) (str= %) %) parsers)]
+    (if (empty? parsers)
+      pass
+      (doparse
+        [c (first parsers)
+         cs (apply group (rest parsers))]
+        (str c cs)))))
 
 (defn optional
   "Returns an optional parser."
@@ -96,6 +97,10 @@
       (if (failed? result)
         ((with-monad parser-m (m-result "")) s)
         result))))
+
+(defn optional-group
+  [& parsers]
+  (->> parsers (apply group) optional))
 
 (declare many+)
 

@@ -10,11 +10,13 @@
 
 (def block
   (group
-    (str= "var") whitespace ident (str= ";")))
+    (optional-group)
+    (optional-group
+      "var" whitespace ident ";")))
 
 (def program
   (group
-    block (char= \.)))
+    block "."))
 
 (defn parse-program
   [program-text]
