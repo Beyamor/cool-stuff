@@ -5,12 +5,19 @@
 (def whitespace
   (many+ (is? #{\space \newline})))
 
+(def number
+  (group
+    (optional (str= "-"))
+    (many+
+      (is? #{\1 \2 \3 \4 \5 \6 \7 \8 \9 \0}))))
+
 (def ident
   (str= "x"))
 
 (def block
   (group
-    (optional-group)
+    (optional-group
+      "const" whitespace ident whitespace "=" whitespace number ";") 
     (optional-group
       "var" whitespace ident ";")))
 
@@ -26,4 +33,5 @@
       (throw (Exception. "Syntax error in program")))))
 
 (deftest can-parse-mimimal-program
-         (is (= "var x;." (parse-program "var x;."))))
+         (is (= "var x;." (parse-program "var x;.")))
+         (is (= "const x = -10;." (parse-program "const x = -10;."))))
