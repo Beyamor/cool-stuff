@@ -3,27 +3,54 @@
         rdp.core))
 
 (def whitespace
-  (many+ (is? #{\space \newline})))
+  (many (is? #{\space \newline})))
+
+(defn token
+  [parser]
+  (doparse
+    [result parser
+     _ whitespace]
+    result))
 
 (def number
-  (group
-    (optional (str= "-"))
-    (many+
-      (is? #{\1 \2 \3 \4 \5 \6 \7 \8 \9 \0}))))
+  (token
+    (group
+      (optional (str= "-"))
+      (many+
+        (is? #{\1 \2 \3 \4 \5 \6 \7 \8 \9 \0})))))
 
 (def ident
-  (str= "x"))
+  (token
+    (str= "x")))
+
+(def defvar
+  (doparse
+    [_ (token (str= "var"))
+     name ident
+     _ (str= ";")]
+    [:var name]))
+
+(def defconst
+  (doparse
+    [_ (token (str= "const"))
+     name ident
+     _ (token (str= "="))
+     value number
+     _ (str= ";")]
+    [:const name value]))
 
 (def block
-  (group
-    (optional-group
-      "const" whitespace ident whitespace "=" whitespace number ";") 
-    (optional-group
-      "var" whitespace ident ";")))
+  (doparse
+    [var-def (optional defvar)
+     const-def (optional defconst)]
+    [:block
+     (filter identity [var-def const-def])]))
 
 (def program
-  (group
-    block "."))
+  (doparse
+    [program block
+     _ (str= ".")]
+    [:program program]))
 
 (defn parse-program
   [program-text]
@@ -33,5 +60,5 @@
       (throw (Exception. "Syntax error in program")))))
 
 (deftest can-parse-mimimal-program
-         (is (= "var x;." (parse-program "var x;.")))
-         (is (= "const x = -10;." (parse-program "const x = -10;."))))
+         (is (= [:program [:block [[:var "x"]]]] (parse-program "var x;.")))
+         (is (= [:program [:block [[:const "x" "-10"]]]] (parse-program "const x = -10;."))))

@@ -95,7 +95,7 @@
   (fn [s]
     (let [result (parser s)]
       (if (failed? result)
-        ((with-monad parser-m (m-result "")) s)
+        ((with-monad parser-m (m-result nil)) s)
         result))))
 
 (defn optional-group
