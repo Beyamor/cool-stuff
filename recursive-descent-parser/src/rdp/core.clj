@@ -26,7 +26,7 @@
             ~body))
 
 (def pass
-  (with-monad parser-m (m-result "")))
+  (with-monad parser-m (m-result nil)))
 
 (defn first-of
   "Concatentates parsers, selects first result."
@@ -87,7 +87,14 @@
       (doparse
         [c (first parsers)
          cs (apply group (rest parsers))]
-        (str c cs)))))
+        (cons c cs)))))
+
+(defn str-group
+  "group, but concatenates the results into a string"
+  [& parsers]
+  (doparse
+    [cs (apply group parsers)]
+    (apply str cs)))
 
 (defn optional
   "Returns an optional parser."
@@ -107,8 +114,8 @@
 (defn many
   "Repeats some parser 0 or more times"
   [parser]
-  (domonad
-    [cs (first-of (many+ parser) pass)]
+  (doparse
+    [cs (first-of (many+ parser) (m-result []))]
     cs))
 
 (defn many+
@@ -117,4 +124,11 @@
   (doparse
     [c parser
      cs (first-of (many+ parser) pass)]
-    (str c cs)))
+    (cons c cs)))
+
+(defn str-many+
+  "many+, but concatenates values into a string"
+  [parser]
+  (doparse
+    [cs (many+ parser)]
+    (apply str cs)))

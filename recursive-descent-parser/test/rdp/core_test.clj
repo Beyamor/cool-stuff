@@ -14,11 +14,11 @@
          (is (= [["abc"" def"]] ((str= "abc") "abc def"))))
 
 (deftest group-test
-         (is (= [["ab" "c"]]
+         (is (= [[["a" \b] "c"]]
                 ((group
                    (str= "a") (char= \b))
                    "abc")))
-         (is (= [["ab" "c"]]
+         (is (= [[["a" \b] "c"]]
                 ((group
                    "a" (char= \b))
                    "abc"))))
@@ -33,9 +33,16 @@
            (is (= [["azb" "c"]] (parser "azbc")))))
 
 (deftest many-test
-         (is (= [["" "b"]] ((many (char= \a)) "b")))
-         (is (= [["aaa" "b"]] ((many (char= \a)) "aaab"))))
+         (is (= [[[] "b"]] ((many (char= \a)) "b")))
+         (is (= [[[\a \a \a] "b"]] ((many (char= \a)) "aaab"))))
 
 (deftest many+-test
-         (is (= [["aaa" "b"]] ((many+ (char= \a)) "aaab")))
+         (is (= [[[\a \a \a] "b"]] ((many+ (char= \a)) "aaab")))
          (is (= [] ((many+ (char= \a)) "b"))))
+
+(comment
+(deftest parse-string
+         (is (= [["it" ""]]
+                ((parse-string
+                  "did {what}" [(str= "it")]
+                   what))))))
