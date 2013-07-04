@@ -132,3 +132,21 @@
   (doparse
     [cs (many+ parser)]
     (apply str cs)))
+
+(declare in-between+)
+
+(defn in-between
+  "Grabs the results of the in-between parser,
+   discarding the separator"
+  [p sep]
+  (doparse
+    [_ sep
+     as (many
+          (doparse [a p
+                    _ (optional sep)]
+                   a))]
+    as))
+
+(def alpha+
+  (str-many+
+    (is? #(re-find #"[a-zA-Z]" (str %)))))

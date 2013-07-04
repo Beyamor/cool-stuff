@@ -39,10 +39,3 @@
 (deftest many+-test
          (is (= [[[\a \a \a] "b"]] ((many+ (char= \a)) "aaab")))
          (is (= [] ((many+ (char= \a)) "b"))))
-
-(comment
-(deftest parse-string
-         (is (= [["it" ""]]
-                ((parse-string
-                  "did {what}" [(str= "it")]
-                   what))))))
