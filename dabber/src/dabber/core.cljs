@@ -1,8 +1,8 @@
-(ns circleator.core
+(ns dabber.core
   (:use [jayq.core :only [$]]
         [cljs.core.async :only [chan sliding-buffer put!]])
-  (:require [circleator.canvas :as canvas]
-            [circleator.draw :as draw])
+  (:require [dabber.canvas :as canvas]
+            [dabber.draw :as draw])
   (:use-macros [cljs.core.async.macros :only [go]]))
 
 (set! *print-fn*
@@ -103,7 +103,7 @@
         load-button (create-load-button)
         download-button (create-download-button)
         files (file-channel load-button)]
-    (doto ($ "body")
+    (doto ($ "#app")
       (.append (:el cnvs))
       (.append (div-wrapped load-button))
       (.append (div-wrapped download-button)))

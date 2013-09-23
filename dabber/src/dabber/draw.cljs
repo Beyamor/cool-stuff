@@ -1,5 +1,5 @@
-(ns circleator.draw
-  (:require [circleator.canvas :as canvas]))
+(ns dabber.draw
+  (:require [dabber.canvas :as canvas]))
 
 (defn outline!
   [context color]

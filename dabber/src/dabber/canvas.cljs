@@ -1,4 +1,4 @@
-(ns circleator.canvas
+(ns dabber.canvas
   (:use [jayq.core :only [$]]))
 
 (defn- get-el-context
