@@ -45,3 +45,10 @@
    & {:keys [x y] source :canvas}]
   (doto destination
     (.drawImage (canvas/raw-el source) x y)))
+
+(defn image!
+  [{:keys [context]}
+   & {:keys [x y image]
+      :or {x 0 y 0}}]
+  (doto context
+    (.drawImage image x y)))

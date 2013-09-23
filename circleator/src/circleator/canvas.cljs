@@ -9,7 +9,7 @@
   [{:keys [el]}]
   (aget el 0))
 
-(defn- set-dimensions!
+(defn- set-el-dimensions!
   [el width height]
   (doto el
     (.width width)
@@ -20,11 +20,15 @@
     (set! (.-width context-canvas) width)
     (set! (.-height context-canvas) height)))
 
+(defn set-dimensions!
+  [{:keys [el]} width height]
+  (set-el-dimensions! el width height))
+
 (defn create
   [& {:keys [width height clear-color]
       :or {clear-color "white"}}]
   (let [el ($ "<canvas>")]
-    (set-dimensions! el width height)
+    (set-el-dimensions! el width height)
     (.css el "background-color" clear-color)
     {:el el
      :context (get-el-context el)
