@@ -24,27 +24,28 @@
 
 (defn read-file
   [file]
-  (go (let [c (chan)
-            file-reader (js/FileReader.)]
-        (set! (.-onload file-reader)
-                 #(put! c (-> % .-target .-result)))
-        (.readAsDataURL file-reader file)
-        (<! c))))
+  (let [c (chan)
+        file-reader (js/FileReader.)]
+    (set! (.-onload file-reader)
+          #(put! c (-> % .-target .-result)))
+    (.readAsDataURL file-reader file)
+    (go (<! c))))
 
 (defn load-image
   [file-data]
-  (go (let [c (chan)
-            image (js/Image.)]
-        (set! (.-onload image)
-                 #(put! c image))
-        (set! (.-src image) file-data)
-        (<! c))))
+  (let [c (chan)
+        image (js/Image.)]
+    (set! (.-onload image)
+          #(put! c image))
+    (set! (.-src image) file-data)
+    (go (<! c))))
 
 (defn read-image
   [file]
-  (go (let [file-data (<! (read-file file))
-            image (<! (load-image file-data))]
-        image)))
+  (go
+    (-> file
+      read-file <!
+      load-image <!)))
 
 (defn draw-image
   [cnvs image]
