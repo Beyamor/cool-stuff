@@ -54,6 +54,13 @@
     draw/clear!
     (draw/image! :image image)))
 
+(defn image->canvas
+  [image]
+  (doto (canvas/create
+          :width (.-width image)
+          :height (.-height image))
+    (draw/image! :image image)))
+
 (defn run
   []
   (let [cnvs (canvas/create :width 0 :height 0)
@@ -65,8 +72,10 @@
         (.append ($ "<div>") load-button)))
     (go (loop [file (<! files)]
           (when file
-            (let [image (<! (read-image file))]
-              (draw-image cnvs image)))
+            (let [image (image->canvas (<! (read-image file)))]
+              (doto cnvs
+                (canvas/set-dimensions! (:width image) (:height image))
+                (draw/canvas! :canvas image))))
           (recur (<! files))))))
 
 ($ run)
