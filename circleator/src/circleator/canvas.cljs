@@ -21,8 +21,11 @@
     (set! (.-height context-canvas) height)))
 
 (defn set-dimensions!
-  [{:keys [el]} width height]
-  (set-el-dimensions! el width height))
+  [{:keys [el] :as canvas} width height]
+  (set-el-dimensions! el width height)
+  (-> canvas
+    (assoc :width width)
+    (assoc :height height)))
 
 (defn create
   [& {:keys [width height clear-color]

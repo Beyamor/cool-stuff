@@ -53,13 +53,6 @@
       read-file <!
       load-image <!)))
 
-(defn draw-image
-  [cnvs image]
-  (doto cnvs
-    (canvas/set-dimensions! (.-width image) (.-height image))
-    draw/clear!
-    (draw/image! :image image)))
-
 (defn image->canvas
   [image]
   (doto (canvas/create
@@ -67,13 +60,16 @@
           :height (.-height image))
     (draw/image! :image image)))
 
+(defn resize-canvas-to-image
+  [cnvs image]
+  (canvas/set-dimensions! cnvs (:width image) (:height image)))
+
 (defn circleate
   [cnvs image]
   (doto cnvs
-    draw/clear!
-    (canvas/set-dimensions! (:width image) (:height image)))
-  (let [distribution 0.01
-        number-of-points (* distribution (:width image) (:height image))
+    (draw/rect! :x 0 :y 0 :width (:width cnvs) :height (:height cnvs) :color "white"))
+  (let [density 0.007
+        number-of-points (* density (:width image) (:height image))
         min-radius 20
         max-radius 10
         alpha 100]
@@ -111,15 +107,17 @@
       (.append (:el cnvs))
       (.append (div-wrapped load-button))
       (.append (div-wrapped download-button)))
-    (go (loop [file (<! files)]
+    (go (loop [cnvs cnvs, file (<! files)]
           (.hide download-button)
-          (when file
-            (let [image (image->canvas (<! (read-image file)))]
-              (circleate cnvs image)
+          (if file
+            (let [image (image->canvas (<! (read-image file)))
+                  resized-cnvs (resize-canvas-to-image cnvs image)]
+              (circleate resized-cnvs image)
               (doto download-button
-                (.attr "href" (canvas/data-url cnvs))
+                (.attr "href" (canvas/data-url resized-cnvs))
                 (.attr "download" (next-image-title))
-                .show)))
-          (recur (<! files))))))
+                .show)
+              (recur resized-cnvs (<! files)))
+            (recur cnvs (<! files)))))))
 
 ($ run)
