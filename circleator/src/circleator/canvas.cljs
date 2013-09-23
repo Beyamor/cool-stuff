@@ -42,3 +42,7 @@
      :g (aget data 1)
      :b (aget data 2)
      :a (aget data 3)}))
+
+(defn data-url
+  [canvas]
+  (-> canvas raw-el .toDataURL))

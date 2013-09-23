@@ -14,6 +14,12 @@
   (doto ($ "<input>")
     (.attr "type" "file")))
 
+(defn create-download-button
+  []
+  (doto ($ "<a>")
+    (.text "Download")
+    .hide))
+
 (defn file-channel
   [load-button]
   (let [files (chan (sliding-buffer 1))]
@@ -80,25 +86,40 @@
                           (canvas/get-pixel x y)
                           (assoc :a alpha)
                           draw/rgba-color)]]
-        ;(draw/circle! cnvs :x x :y y :radius radius :color color)))))
         (draw/rect! cnvs
                     :x (- x radius) :y (- y radius)
                     :width (* 2 radius) :height (* 2 radius)
                     :color color)))))
 
+(defn div-wrapped
+  [el]
+  (.append ($ "<div>") el))
+
+(def counter (atom 0))
+
+(defn next-image-title
+  []
+  (str "wits-" (swap! counter inc)))
+
 (defn run
   []
   (let [cnvs (canvas/create :width 0 :height 0)
         load-button (create-load-button)
+        download-button (create-download-button)
         files (file-channel load-button)]
     (doto ($ "body")
       (.append (:el cnvs))
-      (.append
-        (.append ($ "<div>") load-button)))
+      (.append (div-wrapped load-button))
+      (.append (div-wrapped download-button)))
     (go (loop [file (<! files)]
+          (.hide download-button)
           (when file
             (let [image (image->canvas (<! (read-image file)))]
-              (circleate cnvs image)))
+              (circleate cnvs image)
+              (doto download-button
+                (.attr "href" (canvas/data-url cnvs))
+                (.attr "download" (next-image-title))
+                .show)))
           (recur (<! files))))))
 
 ($ run)
