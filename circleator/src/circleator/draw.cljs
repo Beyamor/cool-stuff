@@ -36,6 +36,14 @@
       (.rect x y width height)
       (fill-and-outline! fill-color outline-color))))
 
+(defn circle!
+  [{:keys [context]} & {:keys [x y radius fill-color outline-color color]}]
+  (let [fill-color (or fill-color color)]
+    (doto context
+      .beginPath
+      (.arc x y radius 0 (* 2 Math/PI) false)
+      (fill-and-outline! fill-color outline-color))))
+
 (defn clear!
   [{:keys [width height context] :as canvas}]
   (.clearRect context 0 0 width height))

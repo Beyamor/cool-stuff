@@ -66,11 +66,25 @@
   (doto cnvs
     draw/clear!
     (canvas/set-dimensions! (:width image) (:height image)))
-  (dorun
-    (for [x (range 0 (:width image) 2)
-          y (range 0 (:height image) 2)]
-      (let [pixel (canvas/get-pixel image x y)]
-        (draw/pixel! cnvs :x x :y y :color (draw/rgba-color pixel))))))
+  (let [distribution 0.01
+        number-of-points (* distribution (:width image) (:height image))
+        min-radius 20
+        max-radius 10
+        alpha 100]
+    (dorun
+      (for [i (range number-of-points)
+            :let [x (rand-int (:width image))
+                  y (rand-int (:height image))
+                  radius (+ min-radius (rand (- max-radius min-radius)))
+                  color (-> image
+                          (canvas/get-pixel x y)
+                          (assoc :a alpha)
+                          draw/rgba-color)]]
+        ;(draw/circle! cnvs :x x :y y :radius radius :color color)))))
+        (draw/rect! cnvs
+                    :x (- x radius) :y (- y radius)
+                    :width (* 2 radius) :height (* 2 radius)
+                    :color color)))))
 
 (defn run
   []
