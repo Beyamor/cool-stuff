@@ -52,3 +52,21 @@
       :or {x 0 y 0}}]
   (doto context
     (.drawImage image x y)))
+
+(defn rgba-color
+  [{:keys [r g b a]}]
+  (str "rgba("
+       (Math/floor r) ","
+       (Math/floor g) ","
+       (Math/floor b) ","
+       (/ a 255) ")"))
+
+(defn pixel!
+  [canvas & {:keys [color x y]
+             :or {a 1}}]
+  (rect! canvas
+         :x x
+         :y y
+         :width 1
+         :height 1
+         :color color))

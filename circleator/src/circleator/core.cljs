@@ -61,6 +61,17 @@
           :height (.-height image))
     (draw/image! :image image)))
 
+(defn circleate
+  [cnvs image]
+  (doto cnvs
+    draw/clear!
+    (canvas/set-dimensions! (:width image) (:height image)))
+  (dorun
+    (for [x (range 0 (:width image) 2)
+          y (range 0 (:height image) 2)]
+      (let [pixel (canvas/get-pixel image x y)]
+        (draw/pixel! cnvs :x x :y y :color (draw/rgba-color pixel))))))
+
 (defn run
   []
   (let [cnvs (canvas/create :width 0 :height 0)
@@ -73,9 +84,7 @@
     (go (loop [file (<! files)]
           (when file
             (let [image (image->canvas (<! (read-image file)))]
-              (doto cnvs
-                (canvas/set-dimensions! (:width image) (:height image))
-                (draw/canvas! :canvas image))))
+              (circleate cnvs image)))
           (recur (<! files))))))
 
 ($ run)

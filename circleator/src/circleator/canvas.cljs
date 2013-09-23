@@ -34,3 +34,11 @@
      :context (get-el-context el)
      :width width
      :height height}))
+
+(defn get-pixel
+  [{:keys [context]} x y]
+  (let [data (.-data (.getImageData context x y 1 1))]
+    {:r (aget data 0)
+     :g (aget data 1)
+     :b (aget data 2)
+     :a (aget data 3)}))
