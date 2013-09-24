@@ -35,7 +35,7 @@
     (set! (.-onload file-reader)
           #(put! c (-> % .-target .-result)))
     (.readAsDataURL file-reader file)
-    (go (<! c))))
+    c))
 
 (defn load-image
   [file-data]
@@ -44,7 +44,7 @@
     (set! (.-onload image)
           #(put! c image))
     (set! (.-src image) file-data)
-    (go (<! c))))
+    c))
 
 (defn read-image
   [file]
