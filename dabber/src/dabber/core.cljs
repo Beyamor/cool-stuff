@@ -105,6 +105,7 @@
         files (file-channel load-button)]
     (doto ($ "#app")
       (.append (:el cnvs))
+      (.append (div-wrapped "Upload an image:"))
       (.append (div-wrapped load-button))
       (.append (div-wrapped download-button)))
     (go (loop [cnvs cnvs, file (<! files)]
