@@ -3,32 +3,32 @@
   (:require [breed.canvas :as cnvs]))
 
 (defn new-xel
-  [width height colors]
-  {:width width
-   :height height
+  [columns rows colors]
+  {:columns columns
+   :rows rows
    :cells (into {}
-                 (for [x (range width)
-                       y (range height)]
+                 (for [x (range columns)
+                       y (range rows)]
                    [[x y] (rand-nth colors)]))})
 
 (defn new-xel-set
-  [& {:keys [width height xel-width xel-height colors]}]
-  {:width width
-   :height height
+  [& {:keys [columns rows xel-columns xel-rows colors]}]
+  {:columns columns
+   :rows rows
    :xels (into {}
-               (for [i (range width)
-                     j (range height)]
-                 [[i j] (new-xel xel-width xel-height colors)]))})
+               (for [i (range columns)
+                     j (range rows)]
+                 [[i j] (new-xel xel-columns xel-rows colors)]))})
 
 (defn draw-xel!
-  [canvas {xel-width :width xel-height :height :as xel}
+  [canvas {:keys [columns rows] :as xel}
    & {:keys [x y width height border]
       :or {border 0}}]
   (let [border2 (* border 2)
-        cell-width (/ (- width border2) xel-width)
-        cell-height (/ (- height border2) xel-height)]
-    (doseq [i (range xel-width)
-            j (range xel-height)]
+        cell-width (/ (- width border2) columns)
+        cell-height (/ (- height border2) rows)]
+    (doseq [i (range columns)
+            j (range rows)]
       (doto canvas
         (cnvs/draw-rect!
           :x (+ x border (* i cell-width))
@@ -38,13 +38,13 @@
           :color (get-in xel [:cells [i j]]))))))
 
 (defn draw-xels!
-  [canvas  {xels-width :width xels-height :height :as xels}
+  [canvas  {:keys [columns rows] :as xels}
    & {:keys [x y width height border]
       :or {x 0 y 0 border 0}}]
-  (let [xel-width (/ width xels-width)
-        xel-height (/ height xels-height)]
-    (doseq [i (range xels-width)
-            j (range xels-height)]
+  (let [xel-width (/ width columns)
+        xel-height (/ height rows)]
+    (doseq [i (range columns)
+            j (range rows)]
       (doto canvas
         (draw-xel! (get-in xels [:xels [i j]])
                   :x (+ x (* i xel-width))
@@ -61,10 +61,10 @@
         xel-width 3
         xel-height 3
         xels (new-xel-set
-               :width 3
-               :height 3
-               :xel-width 32
-               :xel-height 32
+               :columns 3
+               :rows 3
+               :xel-columns 32
+               :xel-rows 32
                :colors #{"black" "white"})]
     (doto canvas
       cnvs/clear!
