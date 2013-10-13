@@ -1,6 +1,6 @@
 (ns breed.core
   (:use [jayq.core :only [$]]
-        [cljs.core.async :only [chan <! put!]])
+        [cljs.core.async :only [chan <! put! timeout]])
   (:require [breed.canvas :as cnvs])
   (:use-macros [cljs.core.async.macros :only [go]]))
 
@@ -17,6 +17,7 @@
   [& {:keys [columns rows xel-columns xel-rows colors]}]
   {:columns columns
    :rows rows
+   :colors colors
    :xels (into {}
                (for [i (range columns)
                      j (range rows)]
@@ -37,6 +38,29 @@
 
     :else
     (assoc xels :father xy)))
+
+(defn breed
+  [{:keys [columns rows] :as mother} father]
+  {:columns columns
+   :rows rows
+   :cells (into {}
+                (for [i (range columns)
+                      j (range rows)]
+                  [[i j] (if (< (Math/random) 0.5)
+                           (get-in mother [:cells [i j]])
+                           (get-in father [:cells [i j]]))]))})
+
+(defn breed-next-generation
+  [{:keys [columns rows] :as xels}]
+  (let [mother (get-in xels [:xels (:mother xels)])
+        father (get-in xels [:xels (:father xels)])]
+    (-> xels
+      (dissoc :mother)
+      (dissoc :father)
+      (assoc :xels (into {}
+                         (for [i (range columns)
+                               j (range rows)]
+                           [[i j] (breed mother father)]))))))
 
 (defn create-xels-view
   [& {:keys [width height border selected unselected]
@@ -142,8 +166,8 @@
         xels (create-xel-set
                :columns 3
                :rows 3
-               :xel-columns 32
-               :xel-rows 32
+               :xel-columns 16
+               :xel-rows 16
                :colors #{"black" "white"})
         view (create-xels-view :width 600 :height 600 :border 5 :selected "#6CC7F8")
         mouse-events (watch-mouse-events (:el canvas))]
@@ -157,7 +181,12 @@
                          (view-selection view xels x y)
                          (update-parent xels))]
               (draw-xels! canvas xels view)
-              (recur (<! mouse-events) xels))
+              (if (both-parents-set? xels)
+                (let [_ (<! (timeout 50)) ; HACK: force redraw
+                      next-generation (breed-next-generation xels)]
+                  (draw-xels! canvas next-generation view)
+                  (recur (<! mouse-events) next-generation))
+                (recur (<! mouse-events) xels)))
 
             (recur (<! mouse-events) xels))))))
 
