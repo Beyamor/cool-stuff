@@ -40,18 +40,20 @@
     (assoc xels :father xy)))
 
 (defn breed
-  [{:keys [columns rows] :as mother} father]
+  [colors {:keys [columns rows] :as mother} father]
   {:columns columns
    :rows rows
    :cells (into {}
                 (for [i (range columns)
                       j (range rows)]
-                  [[i j] (if (< (Math/random) 0.5)
-                           (get-in mother [:cells [i j]])
-                           (get-in father [:cells [i j]]))]))})
+                  [[i j] (if (< (Math/random) 0.05)
+                           (rand-nth colors)
+                           (if (< (Math/random) 0.5)
+                             (get-in mother [:cells [i j]])
+                             (get-in father [:cells [i j]])))]))})
 
 (defn breed-next-generation
-  [{:keys [columns rows] :as xels}]
+  [{:keys [columns rows colors] :as xels}]
   (let [mother (get-in xels [:xels (:mother xels)])
         father (get-in xels [:xels (:father xels)])]
     (-> xels
@@ -60,7 +62,7 @@
       (assoc :xels (into {}
                          (for [i (range columns)
                                j (range rows)]
-                           [[i j] (breed mother father)]))))))
+                           [[i j] (breed colors mother father)]))))))
 
 (defn create-xels-view
   [& {:keys [width height border selected unselected]
@@ -168,7 +170,8 @@
                :rows 3
                :xel-columns 16
                :xel-rows 16
-               :colors #{"black" "white"})
+               ;:colors #{"#FF4848" "#62A9FF" "#FFFF84"}) ;"#C0FF97" "#FFAC62" "#FFC4FF"})
+               :colors #{"#FF4848" "#FFFF84"}) ;"#C0FF97" "#FFAC62" "#FFC4FF"})
         view (create-xels-view :width 600 :height 600 :border 5 :selected "#6CC7F8")
         mouse-events (watch-mouse-events (:el canvas))]
     (doto canvas
