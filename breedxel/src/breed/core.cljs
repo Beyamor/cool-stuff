@@ -13,7 +13,9 @@
 
 (defn run
   []
-  (let [canvas (cnvs/create :width 600 :height 600 :clear-color "black")]
+  (let [canvas (cnvs/create :width 600 :height 600
+                            :clear-color "black"
+                            :parent "#app")]
     (doto canvas
       cnvs/clear!)))
 

@@ -2,7 +2,7 @@
   (:use [jayq.core :only [$]]))
 
 (defn create
-  [& {:keys [width height clear-color]
+  [& {:keys [width height clear-color parent]
       :or {clear-color "white"}}]
   (let [canvas ($ "<canvas>")
         context (-> canvas (aget 0) (.getContext "2d"))]
@@ -12,7 +12,7 @@
       (.css "background-color" clear-color))
     (set! (.-width (.-canvas context)) width)
     (set! (.-height (.-canvas context)) height)
-    (.append ($ "body") canvas)
+    (when parent (.append ($ parent) canvas))
     {:el canvas
      :context context
      :width width
