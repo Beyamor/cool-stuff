@@ -24,8 +24,15 @@
   (doto context
     .beginPath
     (#(set! (.-fillStyle %) color))
-    (.fillRect x y width height)))
+    (.fillRect x y width height)
+    .closePath))
 
 (defn clear!
   [{:keys [context width height]}]
   (.clearRect context 0 0 width height))
+
+(defn draw-canvas!
+  [{:keys [context]} source & {:keys [x y]}]
+  (.drawImage context
+              (-> source :el (aget 0))
+              x y))

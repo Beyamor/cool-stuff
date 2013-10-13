@@ -60,22 +60,30 @@
   [(Math/floor (/ pixel-x (xel-pixel-width view xels)))
    (Math/floor (/ pixel-y (xel-pixel-height view xels)))])
 
+(def xel-image
+  (memoize
+    (fn [{:keys [columns rows cells]} width height]
+      (let [canvas (cnvs/create :width width :height height)
+            cell-width (/ width columns)
+            cell-height (/ height rows)]
+        (doseq [i (range columns)
+                j (range rows)]
+          (doto canvas
+            (cnvs/draw-rect!
+              :x (* i cell-width)
+              :y (* j cell-height)
+              :width cell-width
+              :height cell-height
+              :color (get cells [i j]))))
+        canvas))))
+
 (defn draw-xel!
   [canvas {:keys [columns rows] :as xel}
-   & {:keys [x y width height border]
+   & {:keys [x y width height]
       :or {border 0}}]
-  (let [border2 (* border 2)
-        cell-width (/ (- width border2) columns)
-        cell-height (/ (- height border2) rows)]
-    (doseq [i (range columns)
-            j (range rows)]
-      (doto canvas
-        (cnvs/draw-rect!
-          :x (+ x border (* i cell-width))
-          :y (+ y border (* j cell-height))
-          :width cell-width
-          :height cell-height
-          :color (get-in xel [:cells [i j]]))))))
+  (let [image (xel-image xel width height)]
+    (doto canvas
+      (cnvs/draw-canvas! image :x x :y y))))
 
 (defn selected-parent?
   [xels col-row]
@@ -87,7 +95,8 @@
    {:keys [columns rows] :as xels}
    {:keys [border] :as view}]
   (let [xel-width (xel-pixel-width view xels)
-        xel-height (xel-pixel-height view xels)]
+        xel-height (xel-pixel-height view xels)
+        border2 (* border 2)]
     (doseq [i (range columns)
             j (range rows)]
       (doto canvas
@@ -100,11 +109,10 @@
                    (:selected view)
                    (:unselected view)))
         (draw-xel! (get-in xels [:xels [i j]])
-                  :x (* i xel-width)
-                  :y (* j xel-height)
-                  :width xel-width
-                  :height xel-height
-                  :border border)))))
+                  :x (+ (* i xel-width) border)
+                  :y (+ (* j xel-height) border)
+                  :width (- xel-width border2)
+                  :height (- xel-height border2))))))
 
 (defn watch-mouse-events
   [$el]
