@@ -39,11 +39,13 @@
     (assoc xels :father xy)))
 
 (defn create-xels-view
-  [& {:keys [width height border]
-      :or {boder 0}}]
+  [& {:keys [width height border selected unselected]
+      :or {boder 0 selected "white" unselected "black"}}]
    {:width width
     :height height
-    :border border})
+    :border border
+    :selected selected
+    :unselected unselected})
 
 (defn xel-pixel-width
   [view xels]
@@ -75,6 +77,11 @@
           :height cell-height
           :color (get-in xel [:cells [i j]]))))))
 
+(defn selected-parent?
+  [xels col-row]
+  (or (= col-row (:mother xels))
+      (= col-row (:father xels))))
+
 (defn draw-xels!
   [canvas
    {:keys [columns rows] :as xels}
@@ -84,6 +91,14 @@
     (doseq [i (range columns)
             j (range rows)]
       (doto canvas
+        (cnvs/draw-rect!
+          :x (* i xel-width)
+          :y (* j xel-height)
+          :width xel-width
+          :height xel-height
+          :color (if (selected-parent? xels [i j])
+                   (:selected view)
+                   (:unselected view)))
         (draw-xel! (get-in xels [:xels [i j]])
                   :x (* i xel-width)
                   :y (* j xel-height)
@@ -122,7 +137,7 @@
                :xel-columns 32
                :xel-rows 32
                :colors #{"black" "white"})
-        view (create-xels-view :width 600 :height 600 :border 10)
+        view (create-xels-view :width 600 :height 600 :border 5 :selected "#6CC7F8")
         mouse-events (watch-mouse-events (:el canvas))]
     (doto canvas
       cnvs/clear!
@@ -133,7 +148,7 @@
             (let [xels (->>
                          (view-selection view xels x y)
                          (update-parent xels))]
-              (.log js/console (str (:mother xels) ", " (:father xels)))
+              (draw-xels! canvas xels view)
               (recur (<! mouse-events) xels))
 
             (recur (<! mouse-events) xels))))))
