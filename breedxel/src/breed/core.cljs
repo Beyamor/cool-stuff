@@ -30,6 +30,13 @@
     :xels xels
     :border border})
 
+(defn view-selection
+  [view pixel-x pixel-y]
+  [(Math/floor (/ pixel-x
+                  (/ (:width view) (get-in view [:xels :columns]))))
+   (Math/floor (/ pixel-y
+                  (/ (:height view) (get-in view [:xels :rows]))))])
+
 (defn draw-xel!
   [canvas {:keys [columns rows] :as xel}
    & {:keys [x y width height border]
@@ -99,7 +106,12 @@
       cnvs/clear!
       (draw-xels! xels-view))
     (go (loop [[event-type which [x y]] (<! mouse-events)]
-          (.log js/console (str event-type " " which " " [x y]))
-          (recur (<! mouse-events))))))
+          (case [event-type which]
+            [:mouse-down :left]
+            (let [selection (view-selection xels-view x y)]
+              (.log js/console (str selection))
+              (recur (<! mouse-events)))
+
+            (recur (<! mouse-events)))))))
 
 ($ run)
