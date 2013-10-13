@@ -170,10 +170,9 @@
                :rows 3
                :xel-columns 16
                :xel-rows 16
-               ;:colors #{"#FF4848" "#62A9FF" "#FFFF84"}) ;"#C0FF97" "#FFAC62" "#FFC4FF"})
-               :colors #{"#FF4848" "#FFFF84"}) ;"#C0FF97" "#FFAC62" "#FFC4FF"})
+               :colors #{"#FF4848" "#FFFF84"})
         view (create-xels-view :width 600 :height 600 :border 5 :selected "#6CC7F8")
-        mouse-events (watch-mouse-events (:el canvas))]
+        mouse-events (watch-mouse-events (:$el canvas))]
     (doto canvas
       cnvs/clear!
       (draw-xels! xels view))
@@ -190,6 +189,14 @@
                   (draw-xels! canvas next-generation view)
                   (recur (<! mouse-events) next-generation))
                 (recur (<! mouse-events) xels)))
+
+            [:mouse-up :right]
+            (let [xel (get-in xels [:xels (view-selection view xels x y)])
+                  xel-canvas (cnvs/create :width 600 :height 600)]
+              (cnvs/draw-canvas! xel-canvas (xel-image xel 600 600))
+              (.open js/window
+                     (-> xel-canvas :el (.toDataURL "image/png")))
+              (recur (<! mouse-events) xels))
 
             (recur (<! mouse-events) xels))))))
 

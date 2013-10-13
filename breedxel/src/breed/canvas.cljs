@@ -14,7 +14,8 @@
     (set! (.-width (.-canvas context)) width)
     (set! (.-height (.-canvas context)) height)
     (when parent (.append ($ parent) canvas))
-    {:el canvas
+    {:el (aget canvas 0)
+     :$el canvas
      :context context
      :width width
      :height height}))
@@ -32,7 +33,8 @@
   (.clearRect context 0 0 width height))
 
 (defn draw-canvas!
-  [{:keys [context]} source & {:keys [x y]}]
+  [{:keys [context]} source & {:keys [x y]
+                               :or {x 0 y 0}}]
   (.drawImage context
-              (-> source :el (aget 0))
+              (:el source)
               x y))
