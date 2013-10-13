@@ -2,7 +2,7 @@
   (:use [jayq.core :only [$]])
   (:require [breed.canvas :as cnvs]))
 
-(defn new-xel
+(defn create-xel
   [columns rows colors]
   {:columns columns
    :rows rows
@@ -11,14 +11,22 @@
                        y (range rows)]
                    [[x y] (rand-nth colors)]))})
 
-(defn new-xel-set
+(defn create-xel-set
   [& {:keys [columns rows xel-columns xel-rows colors]}]
   {:columns columns
    :rows rows
    :xels (into {}
                (for [i (range columns)
                      j (range rows)]
-                 [[i j] (new-xel xel-columns xel-rows colors)]))})
+                 [[i j] (create-xel xel-columns xel-rows colors)]))})
+
+(defn create-xels-view
+  [& {:keys [xels width height border]
+      :or {boder 0}}]
+   {:width width
+    :height height
+    :xels xels
+    :border border})
 
 (defn draw-xel!
   [canvas {:keys [columns rows] :as xel}
@@ -38,17 +46,16 @@
           :color (get-in xel [:cells [i j]]))))))
 
 (defn draw-xels!
-  [canvas  {:keys [columns rows] :as xels}
-   & {:keys [x y width height border]
-      :or {x 0 y 0 border 0}}]
+  [canvas  {{:keys [columns rows] :as xels} :xels
+            :keys [width height border]}]
   (let [xel-width (/ width columns)
         xel-height (/ height rows)]
     (doseq [i (range columns)
             j (range rows)]
       (doto canvas
         (draw-xel! (get-in xels [:xels [i j]])
-                  :x (+ x (* i xel-width))
-                  :y (+ y (* j xel-height))
+                  :x (* i xel-width)
+                  :y (* j xel-height)
                   :width xel-width
                   :height xel-height
                   :border border)))))
@@ -60,14 +67,15 @@
                             :parent "#app")
         xel-width 3
         xel-height 3
-        xels (new-xel-set
+        xels (create-xel-set
                :columns 3
                :rows 3
                :xel-columns 32
                :xel-rows 32
-               :colors #{"black" "white"})]
+               :colors #{"black" "white"})
+        xels-view (create-xels-view :xels xels :width 600 :height 600 :border 10)]
     (doto canvas
       cnvs/clear!
-      (draw-xels! xels :width 600 :height 600 :border 10))))
+      (draw-xels! xels-view))))
 
 ($ run)
