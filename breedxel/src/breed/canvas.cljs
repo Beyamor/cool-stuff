@@ -1,5 +1,5 @@
 (ns breed.canvas
-  (:use [jayq.core :only [$]]))
+  (:use [jayq.core :only [$ bind]]))
 
 (defn create
   [& {:keys [width height clear-color parent]
@@ -9,7 +9,8 @@
     (doto canvas
       (.width width)
       (.height height)
-      (.css "background-color" clear-color))
+      (.css "background-color" clear-color)
+      (bind "contextmenu" (constantly false)))
     (set! (.-width (.-canvas context)) width)
     (set! (.-height (.-canvas context)) height)
     (when parent (.append ($ parent) canvas))

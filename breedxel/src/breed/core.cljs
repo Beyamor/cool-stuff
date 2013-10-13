@@ -1,6 +1,8 @@
 (ns breed.core
-  (:use [jayq.core :only [$]])
-  (:require [breed.canvas :as cnvs]))
+  (:use [jayq.core :only [$]]
+        [cljs.core.async :only [chan <! put!]])
+  (:require [breed.canvas :as cnvs])
+  (:use-macros [cljs.core.async.macros :only [go]]))
 
 (defn create-xel
   [columns rows colors]
@@ -60,6 +62,24 @@
                   :height xel-height
                   :border border)))))
 
+(defn watch-mouse-events
+  [$el]
+  (let [c (chan)
+        push-event (fn [event-type]
+                     (fn [e]
+                       (let [which (case (.-which e)
+                                     1 :left
+                                     2 :middle
+                                     3 :right)
+                             parent-offset (.. $el parent offset)
+                             x (- (.-pageX e) (.-left parent-offset))
+                             y (- (.-pageY e) (.-top parent-offset))]
+                         (put! c [event-type which [x y]]))))]
+    (doto $el
+      (.mousedown (push-event :mouse-down))
+      (.mouseup (push-event :mouse-up)))
+    c))
+
 (defn run
   []
   (let [canvas (cnvs/create :width 600 :height 600
@@ -73,9 +93,13 @@
                :xel-columns 32
                :xel-rows 32
                :colors #{"black" "white"})
-        xels-view (create-xels-view :xels xels :width 600 :height 600 :border 10)]
+        xels-view (create-xels-view :xels xels :width 600 :height 600 :border 10)
+        mouse-events (watch-mouse-events (:el canvas))]
     (doto canvas
       cnvs/clear!
-      (draw-xels! xels-view))))
+      (draw-xels! xels-view))
+    (go (loop [[event-type which [x y]] (<! mouse-events)]
+          (.log js/console (str event-type " " which " " [x y]))
+          (recur (<! mouse-events))))))
 
 ($ run)
