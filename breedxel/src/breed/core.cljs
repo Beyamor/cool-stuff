@@ -22,6 +22,22 @@
                      j (range rows)]
                  [[i j] (create-xel xel-columns xel-rows colors)]))})
 
+(defn both-parents-set?
+  [xels]
+  (and (:mother xels) (:father xels)))
+
+(defn update-parent
+  [xels xy]
+  (cond 
+    (nil? (:mother xels))
+    (assoc xels :mother xy)
+
+    (= (:mother xels) xy)
+    (dissoc xels :mother)
+
+    :else
+    (assoc xels :father xy)))
+
 (defn create-xels-view
   [& {:keys [width height border]
       :or {boder 0}}]
@@ -111,13 +127,15 @@
     (doto canvas
       cnvs/clear!
       (draw-xels! xels view))
-    (go (loop [[event-type which [x y]] (<! mouse-events)]
+    (go (loop [[event-type which [x y]] (<! mouse-events), xels xels]
           (case [event-type which]
             [:mouse-down :left]
-            (let [selection (view-selection view xels x y)]
-              (.log js/console (str selection))
-              (recur (<! mouse-events)))
+            (let [xels (->>
+                         (view-selection view xels x y)
+                         (update-parent xels))]
+              (.log js/console (str (:mother xels) ", " (:father xels)))
+              (recur (<! mouse-events) xels))
 
-            (recur (<! mouse-events)))))))
+            (recur (<! mouse-events) xels))))))
 
 ($ run)
