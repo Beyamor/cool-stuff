@@ -23,19 +23,24 @@
                  [[i j] (create-xel xel-columns xel-rows colors)]))})
 
 (defn create-xels-view
-  [& {:keys [xels width height border]
+  [& {:keys [width height border]
       :or {boder 0}}]
    {:width width
     :height height
-    :xels xels
     :border border})
 
+(defn xel-pixel-width
+  [view xels]
+  (/ (:width view) (:columns xels)))
+
+(defn xel-pixel-height
+  [view xels]
+  (/ (:height view) (:rows xels)))
+
 (defn view-selection
-  [view pixel-x pixel-y]
-  [(Math/floor (/ pixel-x
-                  (/ (:width view) (get-in view [:xels :columns]))))
-   (Math/floor (/ pixel-y
-                  (/ (:height view) (get-in view [:xels :rows]))))])
+  [view xels pixel-x pixel-y]
+  [(Math/floor (/ pixel-x (xel-pixel-width view xels)))
+   (Math/floor (/ pixel-y (xel-pixel-height view xels)))])
 
 (defn draw-xel!
   [canvas {:keys [columns rows] :as xel}
@@ -55,10 +60,11 @@
           :color (get-in xel [:cells [i j]]))))))
 
 (defn draw-xels!
-  [canvas  {{:keys [columns rows] :as xels} :xels
-            :keys [width height border]}]
-  (let [xel-width (/ width columns)
-        xel-height (/ height rows)]
+  [canvas
+   {:keys [columns rows] :as xels}
+   {:keys [border] :as view}]
+  (let [xel-width (xel-pixel-width view xels)
+        xel-height (xel-pixel-height view xels)]
     (doseq [i (range columns)
             j (range rows)]
       (doto canvas
@@ -100,15 +106,15 @@
                :xel-columns 32
                :xel-rows 32
                :colors #{"black" "white"})
-        xels-view (create-xels-view :xels xels :width 600 :height 600 :border 10)
+        view (create-xels-view :width 600 :height 600 :border 10)
         mouse-events (watch-mouse-events (:el canvas))]
     (doto canvas
       cnvs/clear!
-      (draw-xels! xels-view))
+      (draw-xels! xels view))
     (go (loop [[event-type which [x y]] (<! mouse-events)]
           (case [event-type which]
             [:mouse-down :left]
-            (let [selection (view-selection xels-view x y)]
+            (let [selection (view-selection view xels x y)]
               (.log js/console (str selection))
               (recur (<! mouse-events)))
 
