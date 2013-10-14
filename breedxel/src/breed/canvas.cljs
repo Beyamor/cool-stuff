@@ -2,7 +2,7 @@
   (:use [jayq.core :only [$ bind]]))
 
 (defn create
-  [& {:keys [width height clear-color parent]
+  [& {:keys [width height clear-color parent focusable?]
       :or {clear-color "white"}}]
   (let [canvas ($ "<canvas>")
         context (-> canvas (aget 0) (.getContext "2d"))]
@@ -13,7 +13,10 @@
       (bind "contextmenu" (constantly false)))
     (set! (.-width (.-canvas context)) width)
     (set! (.-height (.-canvas context)) height)
-    (when parent (.append ($ parent) canvas))
+    (when parent
+      (.append ($ parent) canvas))
+    (when focusable?
+      (.attr canvas "tabindex" 0))
     {:el (aget canvas 0)
      :$el canvas
      :context context

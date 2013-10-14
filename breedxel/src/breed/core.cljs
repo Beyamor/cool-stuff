@@ -140,10 +140,10 @@
                   :width (- xel-width border2)
                   :height (- xel-height border2))))))
 
-(defn watch-mouse-events
+(defn watch-input-events
   [$el]
   (let [c (chan)
-        push-event (fn [event-type]
+        push-mouse-event (fn [event-type]
                      (fn [e]
                        (let [which (case (.-which e)
                                      1 :left
@@ -152,27 +152,35 @@
                              parent-offset (.. $el parent offset)
                              x (- (.-pageX e) (.-left parent-offset))
                              y (- (.-pageY e) (.-top parent-offset))]
-                         (put! c [event-type which [x y]]))))]
+                         (put! c [event-type which [x y]]))))
+        push-key-event (fn [event-type]
+                         (fn [e]
+                           (put! c [event-type (.-which e)])))]
     (doto $el
-      (.mousedown (push-event :mouse-down))
-      (.mouseup (push-event :mouse-up)))
+      (.mousedown (push-mouse-event :mouse-down))
+      (.mouseup (push-mouse-event :mouse-up))
+      (.keydown (push-key-event :key-down))
+      (.keypress (push-key-event :key-press))
+      (.keyup (push-key-event :key-up)))
     c))
 
 (defn run
   []
   (let [canvas (cnvs/create :width 600 :height 600
                             :clear-color "pink"
-                            :parent "#app")
+                            :parent "#app"
+                            :focusable? true)
         xel-width 3
         xel-height 3
-        xels (create-xel-set
-               :columns 3
-               :rows 3
-               :xel-columns 8
-               :xel-rows 8
-               :colors #{"#FF4848" "#FFFF84"})
+        create-new-xels #(create-xel-set
+                    :columns 3
+                    :rows 3
+                    :xel-columns 8
+                    :xel-rows 8
+                    :colors #{"#FF4848" "#FFFF84"})
+        xels (create-new-xels)
         view (create-xels-view :width 600 :height 600 :border 5 :selected "#6CC7F8")
-        mouse-events (watch-mouse-events (:$el canvas))]
+        mouse-events (watch-input-events (:$el canvas))]
     (doto canvas
       cnvs/clear!
       (draw-xels! xels view))
@@ -197,6 +205,11 @@
               (.open js/window
                      (-> xel-canvas :el (.toDataURL "image/png")))
               (recur (<! mouse-events) xels))
+
+            [:key-up 82]
+            (let [new-xels (create-new-xels)]
+              (draw-xels! canvas new-xels view)
+              (recur (<! mouse-events) new-xels))
 
             (recur (<! mouse-events) xels))))))
 
