@@ -168,8 +168,8 @@
         xels (create-xel-set
                :columns 3
                :rows 3
-               :xel-columns 16
-               :xel-rows 16
+               :xel-columns 8
+               :xel-rows 8
                :colors #{"#FF4848" "#FFFF84"})
         view (create-xels-view :width 600 :height 600 :border 5 :selected "#6CC7F8")
         mouse-events (watch-mouse-events (:$el canvas))]
