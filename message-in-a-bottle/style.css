@@ -1,0 +1,40 @@
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: "Helvetica";
+	font-size: large;
+	background-color: white;
+}
+
+#app {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 800px;
+	height: 600px;
+}
+
+#input {
+	position: absolute;
+	left: 275px;
+	top: 390px;
+	border-color: #ddd;
+	resize: none;
+	width: 250px;
+	height: 80px;
+}
+
+#submit {
+	position: absolute;
+	left: 450px;
+	top: 480px;
+}
+
+#received-message {
+	position: absolute;
+	width: 600px;
+	top: 50px;
+	left: 100px;
+	height: 250px;
+	overflow: auto;
+}
