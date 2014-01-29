@@ -12,8 +12,8 @@
 (def new-turtle
   {:state   {:position  origin
              :origin    origin
-             :bearing   0
-             :pen-down? false}
+             :bearing   (/ Math/PI 2)
+             :pen-down? true}
    :history []})
 
 (defn push-history
@@ -58,6 +58,4 @@
 
 (defn state-sequence
   [{:keys [state history]}]
-  (-> history
-    (conj state)
-    reverse))
+  (conj history state))
