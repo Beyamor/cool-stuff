@@ -58,3 +58,7 @@
 (defn state-sequence
   [{:keys [state history]}]
   (conj history state))
+
+(defn go
+  [turtle x y]
+  (set-property turtle :position {:x x :y }))
