@@ -39,17 +39,17 @@
                       (update-in [:x] + (* distance (Math/cos bearing)))
                       (update-in [:y] + (* distance (Math/sin bearing))))))
 
-(defn backward
+(defn back
   [turtle distance]
   (forward turtle (* -1 distance)))
 
-(defn turn-left 
+(defn left 
   [turtle degrees]
-  (update-property turtle :bearing + degrees))
+  (update-property turtle :bearing + (degrees->rad degrees)))
 
-(defn turn-right
+(defn right
   [turtle degrees]
-  (update-property turtle :bearing - degrees))
+  (update-property turtle :bearing - (degrees->rad degrees)))
 
 (defn pen-down
   [turtle]
@@ -65,4 +65,4 @@
 
 (defn go
   [turtle x y]
-  (set-property turtle :position {:x x :y }))
+  (set-property turtle :position {:x x :y y}))
