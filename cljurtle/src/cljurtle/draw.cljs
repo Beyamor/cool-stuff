@@ -1,4 +1,5 @@
-(ns cljurtle.draw)
+(ns cljurtle.draw
+  (:require [cljurtle.core :as core]))
 
 (defn- draw-line!
   [{:keys [width height context]} from to]
@@ -13,15 +14,21 @@
       (.lineTo to-x to-y)
       .stroke)))
 
+(defn- set-color!
+  [{:keys [context]} color]
+  (set! (.-strokeStyle context) color))
+
 (defn turtle!
-  [canvas states]
-  (loop [[current-state & more-states] states]
-    (when (seq more-states)
-      (let [next-state (first more-states)]
-        (when (and (:pen-down? current-state)
-                   (not= (:position current-state)
-                         (:position next-state)))
-          (draw-line! canvas
-                      (:position current-state)
-                      (:position next-state)))
-        (recur more-states)))))
+  [canvas turtle]
+  (let [states (core/state-sequence turtle)]
+    (loop [[current-state & more-states] states]
+      (when (seq more-states)
+        (let [next-state (first more-states)]
+          (when (and (:pen-down? current-state)
+                     (not= (:position current-state)
+                           (:position next-state)))
+            (set-color! canvas (:pen-color current-state))
+            (draw-line! canvas
+                        (:position current-state)
+                        (:position next-state)))
+          (recur more-states))))))

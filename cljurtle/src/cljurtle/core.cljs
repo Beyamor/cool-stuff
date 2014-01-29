@@ -5,16 +5,15 @@
   [degrees]
   (-> degrees (* Math/PI) (/ 180)))
 
-(def origin
-  {:x 0
-   :y 0})
-
-(def new-turtle
-  {:state   {:position  origin
-             :origin    origin
-             :bearing   (/ Math/PI 2)
-             :pen-down? true}
-   :history []})
+(defn new-turtle
+  ([]
+   (new-turtle 0 0))
+  ([x y]
+   {:state   {:position  {:x x :y y}
+              :bearing   (/ Math/PI 2)
+              :pen-down? true
+              :pen-color "black"}
+    :history []}))
 
 (defn- push-history
   [{:keys [state] :as turtle}]
@@ -63,6 +62,13 @@
   [{:keys [state history]}]
   (conj history state))
 
-(defn go
+(defn jump-to
   [turtle x y]
-  (set-property turtle :position {:x x :y y}))
+  (-> turtle
+    pen-up
+    (set-property :position {:x x :y y})
+    (set-property :pen-down? (-> turtle :state :pen-down?))))
+
+(defn pen-color
+  [turtle color]
+  (set-property turtle :pen-color color))
