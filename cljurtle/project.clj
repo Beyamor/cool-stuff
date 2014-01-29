@@ -5,7 +5,8 @@
                       :url "http://www.eclipse.org/legal/epl-v10.html"}
             :plugins [[lein-cljsbuild "1.0.1"]]
             :dependencies [[org.clojure/clojure "1.5.1"]
-                           [org.clojure/clojurescript "0.0-2138"]]
+                           [org.clojure/clojurescript "0.0-2138"]
+                           [lonocloud/synthread "1.0.4"]]
             :cljsbuild {
                         :builds [{
                                   :source-paths ["src"]
