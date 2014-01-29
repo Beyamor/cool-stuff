@@ -39,6 +39,10 @@
                       (update-in [:x] + (* distance (Math/cos bearing)))
                       (update-in [:y] + (* distance (Math/sin bearing))))))
 
+(defn backward
+  [turtle distance]
+  (forward turtle (* -1 distance)))
+
 (defn turn-left 
   [turtle degrees]
   (update-property turtle :bearing + degrees))
