@@ -32,7 +32,7 @@
     push-history
     (update-in [:state property] #(apply f % args))))
 
-(defn move-forward
+(defn forward
   [{{:keys [bearing]} :state :as turtle} distance]
   (update-property turtle :position
                    #(-> %
@@ -47,11 +47,11 @@
   [turtle degrees]
   (update-property turtle :bearing - degrees))
 
-(defn lower-pen
+(defn pen-down
   [turtle]
   (set-property turtle :pen-down? true))
 
-(defn raise-pen
+(defn pen-up
   [turtle]
   (set-property turtle :pen-down? false))
 

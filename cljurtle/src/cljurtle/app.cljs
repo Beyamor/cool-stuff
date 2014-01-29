@@ -11,11 +11,11 @@
 
 (set! (.-onload js/window)
       #(let [turtle (-> core/new-turtle
-                      (core/move-forward 40)
+                      (core/forward 40)
                       (core/turn-right 45)
-                      (core/move-forward 40)
+                      (core/forward 40)
                       (core/turn-left 45)
-                      (core/move-forward 40))]
+                      (core/forward 40))]
          (draw/turtle!
            (get-canvas "canvas")
            (core/state-sequence turtle))))
