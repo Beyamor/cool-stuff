@@ -1,32 +1,36 @@
 (ns cljurtle.app
-  (:require [cljurtle.core :as core :refer [forward back left right new-turtle pen-color jump-to]]
+  (:require [cljurtle.core :as core]
             [cljurtle.draw :as draw]
             [lonocloud.synthread :as ->]
             [seesaw.core :as s]
             [seesaw.bind :as sb]))
 
-(defn fib
-  [turtle depth]
-  (-> turtle
-    (forward 30)
-    (->/when (> depth 2)
-             (left 15)
-             (fib (- depth 1))
-             (right 30)
-             (fib (- depth 2))
-             (left 15))
-    (back 30)))
+(comment
+  (defn fib
+    [turtle depth]
+    (-> turtle
+      (move-forward 30)
+      (->/when (> depth 2)
+               (turn-left 15)
+               (fib (- depth 1))
+               (turn-right 30)
+               (fib (- depth 2))
+               (turn-left 15))
+      (move-backward 30)))
+  )
 
-(defn fern
-  [turtle size]
-  (-> turtle
-    (->/when (> size 4)
-             (forward (/ size 25))
-             (left 90)  (fern (* size 0.3))
-             (right 90)
-             (right 90) (fern (* size 0.3))
-             (left 90)  (fern (* size 0.85))
-             (back (/ size 25)))))
+(comment
+  (defn fern
+    [turtle size]
+    (-> turtle
+      (->/when (> size 4)
+               (move-forward (/ size 25))
+               (turn-left 90)  (fern (* size 0.3))
+               (turn-right 90)
+               (turn-right 90) (fern (* size 0.3))
+               (turn-left 90)  (fern (* size 0.85))
+               (move-backward (/ size 25)))))
+  )
 
 (defn create-canvas
   [turtles]
@@ -50,7 +54,9 @@
              (clojure.core/refer-clojure)
              (require '[lonocloud.synthread :as ->])
              (require '[cljurtle.core :as core
-                        :refer [forward back left right new-turtle pen-color jump-to]]))))
+                        :refer [move-forward move-backward turn-left turn-right
+                                new-turtle set-color jump-to lower-pen
+                                raise-pen get-property set-property update-property]]))))
   (intern script-ns 'def-turtle (fn [turtle]
                                   (swap! turtles conj turtle))))
 

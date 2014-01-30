@@ -19,42 +19,46 @@
   [{:keys [state] :as turtle}]
   (update-in turtle [:history] conj state))
 
-(defn- set-property
+(defn set-property
   [turtle property value]
   (-> turtle
     push-history
     (assoc-in [:state property] value)))
 
-(defn- update-property
+(defn update-property
   [turtle property f & args]
   (-> turtle
     push-history
     (update-in [:state property] #(apply f % args))))
 
-(defn forward
+(defn get-property
+  [turtle property]
+  (get-in turtle [:state property]))
+
+(defn move-forward
   [{{:keys [bearing]} :state :as turtle} distance]
   (update-property turtle :position
                    #(-> %
                       (update-in [:x] + (* distance (Math/cos bearing)))
                       (update-in [:y] + (* distance (Math/sin bearing))))))
 
-(defn back
+(defn move-backward
   [turtle distance]
-  (forward turtle (* -1 distance)))
+  (move-forward turtle (* -1 distance)))
 
-(defn left 
+(defn turn-left 
   [turtle degrees]
   (update-property turtle :bearing + (degrees->rad degrees)))
 
-(defn right
+(defn turn-right
   [turtle degrees]
   (update-property turtle :bearing - (degrees->rad degrees)))
 
-(defn pen-down
+(defn lower-pen
   [turtle]
   (set-property turtle :pen-down? true))
 
-(defn pen-up
+(defn raise-pen
   [turtle]
   (set-property turtle :pen-down? false))
 
@@ -65,10 +69,10 @@
 (defn jump-to
   [turtle x y]
   (-> turtle
-    pen-up
+    raise-pen
     (set-property :position {:x x :y y})
     (set-property :pen-down? (-> turtle :state :pen-down?))))
 
-(defn pen-color
+(defn set-color
   [turtle color]
   (set-property turtle :pen-color color))
