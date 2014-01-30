@@ -71,28 +71,7 @@
 (defn run
   [turtles script]
   (reset! turtles
-          (eval-script
-            "(defn fib
-              [turtle depth]
-                (-> turtle
-                  (forward 30)
-                  (->/when (> depth 2)
-                    (left 15)
-                    (fib (- depth 1))
-                    (right 30)
-                    (fib (- depth 2))
-                    (left 15))
-                    (back 30)))
-
-            (def-turtle
-              (-> (new-turtle 0 -100)
-                (pen-color \"green\")
-                (fib 10)))
-            
-            (def-turtle
-              (-> (new-turtle 50 -50)
-                (pen-color \"blue\")
-                (fib 5)))")))
+          (eval-script script)))
 
 (defn -main [& args]
   (let [turtles     (atom [])
