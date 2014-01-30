@@ -5,33 +5,6 @@
             [seesaw.core :as s]
             [seesaw.bind :as sb]))
 
-(comment
-  (defn fib
-    [turtle depth]
-    (-> turtle
-      (move-forward 30)
-      (->/when (> depth 2)
-               (turn-left 15)
-               (fib (- depth 1))
-               (turn-right 30)
-               (fib (- depth 2))
-               (turn-left 15))
-      (move-backward 30)))
-  )
-
-(comment
-  (defn fern
-    [turtle size]
-    (-> turtle
-      (->/when (> size 4)
-               (move-forward (/ size 25))
-               (turn-left 90)  (fern (* size 0.3))
-               (turn-right 90)
-               (turn-right 90) (fern (* size 0.3))
-               (turn-left 90)  (fern (* size 0.85))
-               (move-backward (/ size 25)))))
-  )
-
 (defn create-canvas
   [turtles]
   (let [width   600
