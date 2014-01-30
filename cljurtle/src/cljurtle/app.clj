@@ -2,7 +2,8 @@
   (:require [cljurtle.core :as core :refer [forward back left right new-turtle pen-color jump-to]]
             [cljurtle.draw :as draw]
             [lonocloud.synthread :as ->]
-            [seesaw.core :as s]))
+            [seesaw.core :as s]
+            [seesaw.bind :as sb]))
 
 (defn fib
   [turtle depth]
@@ -27,12 +28,31 @@
              (left 90)  (fern (* size 0.85))
              (back (/ size 25)))))
 
+(defn create-canvas
+  [turtle]
+  (let [width   600
+        height  600
+        el      (s/canvas
+                  :size [width :by height]
+                  :paint  (fn [c g]
+                            (draw/turtle! g width height @turtle)))]
+    (sb/bind turtle
+             (sb/b-do [_]
+                    (s/repaint! el)))
+    el))
+
 (defn -main [& args]
-  (let [canvas (s/canvas
-                 :size [600 :by 600])]
-  (s/invoke-later
-    (-> (s/frame :title     "Cljurtle"
-                 :content   canvas
-                 :on-close  :exit)
-      s/pack!
-      s/show!))))
+  (let [turtle  (atom nil)
+        canvas  (create-canvas turtle)]
+    (s/invoke-later
+      (-> (s/frame :title     "Cljurtle"
+                   :content   canvas
+                   :on-close  :exit)
+        s/pack!
+        s/show!))
+    (s/invoke-later
+      (reset! turtle
+              (-> (new-turtle 0 -100)
+                (pen-color "green")
+                (fib 10))))
+    nil))
