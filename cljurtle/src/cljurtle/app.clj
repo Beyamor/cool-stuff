@@ -3,22 +3,8 @@
             [cljurtle.draw :as draw]
             [lonocloud.synthread :as ->]
             [seesaw.core :as s]
-            [seesaw.bind :as sb]))
-
-(defn create-canvas
-  [turtles]
-  (let [width   600
-        height  400
-        el      (s/canvas
-                  :size [width :by height]
-                  :paint  (fn [c g]
-                            (doseq [turtle @turtles]
-                              (draw/turtle-sequence! g width height
-                                                     (core/state-sequence turtle)))))]
-    (sb/bind turtles
-             (sb/b-do [_]
-                    (s/repaint! el)))
-    el))
+            [seesaw.bind :as sb])
+  (:import java.awt.Font))
 
 (defn set-up-script-ns
   [script-ns turtles]
@@ -52,12 +38,34 @@
   (reset! turtles
           (eval-script script)))
 
+(defn create-canvas
+  [turtles]
+  (let [width   600
+        height  400
+        el      (s/canvas
+                  :size [width :by height]
+                  :paint  (fn [c g]
+                            (doseq [turtle @turtles]
+                              (draw/turtle-sequence! g width height
+                                                     (core/state-sequence turtle)))))]
+    (sb/bind turtles
+             (sb/b-do [_]
+                    (s/repaint! el)))
+    el))
+
+(defn create-script-box
+  []
+  (->
+    (s/text
+                      :multi-line?  true
+                      :rows         15)
+    (doto
+      (.setFont (Font. "SansSerif" Font/PLAIN 12)))))
+
 (defn -main [& args]
   (let [turtles     (atom [])
         canvas      (create-canvas turtles)
-        script-box  (s/text
-                      :multi-line?  true
-                      :rows         15)
+        script-box  (create-script-box)
         run-button  (s/button
                       :text         "run"
                       :listen       [:action
