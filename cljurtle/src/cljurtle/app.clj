@@ -29,23 +29,19 @@
              (back (/ size 25)))))
 
 (defn create-canvas
-  [turtle]
+  [turtles]
   (let [width   600
         height  400
         el      (s/canvas
                   :size [width :by height]
                   :paint  (fn [c g]
-                            (draw/turtle-sequence! g width height
-                                                   (core/state-sequence @turtle))))]
-    (sb/bind turtle
+                            (doseq [turtle @turtles]
+                              (draw/turtle-sequence! g width height
+                                                     (core/state-sequence turtle)))))]
+    (sb/bind turtles
              (sb/b-do [_]
                     (s/repaint! el)))
     el))
-
-(defn interns
-  [ns & interns]
-  (doseq [[name val] (partition 2 interns)]
-    (intern ns name val)))
 
 (defn set-up-script-ns
   [script-ns turtles]
@@ -70,11 +66,11 @@
         read-string
         eval))
     (remove-ns script-ns-name)
-    (first @turtles)))
+    @turtles))
 
 (defn run
-  [state script]
-  (reset! state
+  [turtles script]
+  (reset! turtles
           (eval-script
             "(defn fib
               [turtle depth]
@@ -91,11 +87,16 @@
             (def-turtle
               (-> (new-turtle 0 -100)
                 (pen-color \"green\")
-                (fib 10)))")))
+                (fib 10)))
+            
+            (def-turtle
+              (-> (new-turtle 50 -50)
+                (pen-color \"blue\")
+                (fib 5)))")))
 
 (defn -main [& args]
-  (let [turtle      (atom nil)
-        canvas      (create-canvas turtle)
+  (let [turtles     (atom [])
+        canvas      (create-canvas turtles)
         script-box  (s/text
                       :multi-line?  true
                       :rows         15)
@@ -103,7 +104,7 @@
                       :text         "run"
                       :listen       [:action
                                      (fn [_]
-                                       (run turtle (s/value script-box)))])]
+                                       (run turtles (s/value script-box)))])]
     (s/invoke-later
       (-> (s/frame :title     "Cljurtle"
                    :content   (s/vertical-panel
