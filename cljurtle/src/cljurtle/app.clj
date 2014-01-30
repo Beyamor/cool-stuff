@@ -62,15 +62,19 @@
     (doto
       (.setFont (Font. "SansSerif" Font/PLAIN 12)))))
 
+(defn create-run-button
+  [turtles script-box]
+  (s/button
+    :text   "run"
+    :listen [:action
+                   (fn [_]
+                     (run turtles (s/value script-box)))]))
+
 (defn -main [& args]
   (let [turtles     (atom [])
         canvas      (create-canvas turtles)
         script-box  (create-script-box)
-        run-button  (s/button
-                      :text         "run"
-                      :listen       [:action
-                                     (fn [_]
-                                       (run turtles (s/value script-box)))])]
+        run-button  (create-run-button turtles script-box)]
     (s/invoke-later
       (-> (s/frame :title     "Cljurtle"
                    :content   (s/vertical-panel
