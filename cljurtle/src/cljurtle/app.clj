@@ -35,7 +35,8 @@
         el      (s/canvas
                   :size [width :by height]
                   :paint  (fn [c g]
-                            (draw/turtle! g width height @turtle)))]
+                            (draw/turtle-sequence! g width height
+                                                   (core/state-sequence @turtle))))]
     (sb/bind turtle
              (sb/b-do [_]
                     (s/repaint! el)))

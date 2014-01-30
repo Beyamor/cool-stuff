@@ -1,6 +1,5 @@
 (ns cljurtle.draw
-  (:require [cljurtle.core :as core]
-            [seesaw.color :refer [color]]))
+  (:require [seesaw.color :refer [color]]))
 
 (defn- draw-line!
   [graphics width height from to]
@@ -17,17 +16,16 @@
   [{:keys [context]} color]
   (set! (.-strokeStyle context) color))
 
-(defn turtle!
-  [graphics width height turtle]
-  (let [states    (core/state-sequence turtle)]
-    (loop [[current-state & more-states] states]
-      (when (seq more-states)
-        (let [next-state (first more-states)]
-          (when (and (:pen-down? current-state)
-                     (not= (:position current-state)
-                           (:position next-state)))
-              (.setColor graphics (->> current-state :pen-color color))
-              (draw-line! graphics width height
-                          (:position current-state)
-                          (:position next-state)))
-          (recur more-states))))))
+(defn turtle-sequence!
+  [graphics width height states]
+  (loop [[current-state & more-states] states]
+    (when (seq more-states)
+      (let [next-state (first more-states)]
+        (when (and (:pen-down? current-state)
+                   (not= (:position current-state)
+                         (:position next-state)))
+          (.setColor graphics (->> current-state :pen-color color))
+          (draw-line! graphics width height
+                      (:position current-state)
+                      (:position next-state)))
+        (recur more-states)))))
