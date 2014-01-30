@@ -41,7 +41,7 @@
         prev-ns         *ns*]
     (set-up-script-ns script-ns turtles)
     (binding [*ns*  script-ns]
-      (-> (str "(do " script ")")
+      (-> (str "(do\n" script "\n)")
         read-string
         eval))
     (remove-ns script-ns-name)
