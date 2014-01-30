@@ -42,20 +42,27 @@
                     (s/repaint! el)))
     el))
 
+(defn run
+  [state script]
+  (println script))
+
 (defn -main [& args]
   (let [turtle      (atom nil)
         canvas      (create-canvas turtle)
         script-box  (s/text
                       :multi-line?  true
                       :rows         15)
-        run         (s/button
-                      :text         "run")]
+        run-button  (s/button
+                      :text         "run"
+                      :listen       [:action
+                                     (fn [_]
+                                       (run turtle (s/value script-box)))])]
     (s/invoke-later
       (-> (s/frame :title     "Cljurtle"
                    :content   (s/vertical-panel
                                 :items  [canvas
                                          (s/scrollable script-box)
-                                         run])
+                                         run-button])
                    :on-close  :exit)
         s/pack!
         s/show!))
