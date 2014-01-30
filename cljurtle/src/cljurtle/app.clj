@@ -1,14 +1,8 @@
 (ns cljurtle.app
   (:require [cljurtle.core :as core :refer [forward back left right new-turtle pen-color jump-to]]
-            [cljurtle.draw :as draw])
-  (:require-macros [lonocloud.synthread :as ->]))
-
-(defn get-canvas
-  [id]
-  (let [el (.getElementById js/document id)]
-    {:context (.getContext el "2d")
-     :width   (.-width el)
-     :height  (.-height el)}))
+            [cljurtle.draw :as draw]
+            [lonocloud.synthread :as ->]
+            [seesaw.core :as s]))
 
 (defn fib
   [turtle depth]
@@ -33,13 +27,12 @@
              (left 90)  (fern (* size 0.85))
              (back (/ size 25)))))
 
-(set! (.-onload js/window)
-      #(let [turtle (-> (new-turtle -50 -100)
-                      (pen-color "green")
-                      (fern 1500)
-                      (pen-color "blue")
-                      (jump-to 50 -150)
-                      (fern 1000))]
-         (draw/turtle!
-           (get-canvas "canvas")
-           turtle)))
+(defn -main [& args]
+  (let [canvas (s/canvas
+                 :size [600 :by 600])]
+  (s/invoke-later
+    (-> (s/frame :title     "Cljurtle"
+                 :content   canvas
+                 :on-close  :exit)
+      s/pack!
+      s/show!))))

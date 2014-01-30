@@ -1,5 +1,5 @@
 (ns cljurtle.core
-  (:require-macros [lonocloud.synthread :as ->]))
+  (:require [lonocloud.synthread :as ->]))
 
 (defn degrees->rad
   [degrees]
