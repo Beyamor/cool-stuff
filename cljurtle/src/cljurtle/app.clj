@@ -31,7 +31,7 @@
 (defn create-canvas
   [turtle]
   (let [width   600
-        height  600
+        height  400
         el      (s/canvas
                   :size [width :by height]
                   :paint  (fn [c g]
@@ -43,11 +43,16 @@
     el))
 
 (defn -main [& args]
-  (let [turtle  (atom nil)
-        canvas  (create-canvas turtle)]
+  (let [turtle      (atom nil)
+        canvas      (create-canvas turtle)
+        script-box  (s/text
+                      :multi-line?  true
+                      :rows         15)]
     (s/invoke-later
       (-> (s/frame :title     "Cljurtle"
-                   :content   canvas
+                   :content   (s/vertical-panel
+                                :items  [canvas
+                                         (s/scrollable script-box)])
                    :on-close  :exit)
         s/pack!
         s/show!))
