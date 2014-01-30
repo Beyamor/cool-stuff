@@ -47,12 +47,15 @@
         canvas      (create-canvas turtle)
         script-box  (s/text
                       :multi-line?  true
-                      :rows         15)]
+                      :rows         15)
+        run         (s/button
+                      :text         "run")]
     (s/invoke-later
       (-> (s/frame :title     "Cljurtle"
                    :content   (s/vertical-panel
                                 :items  [canvas
-                                         (s/scrollable script-box)])
+                                         (s/scrollable script-box)
+                                         run])
                    :on-close  :exit)
         s/pack!
         s/show!))
