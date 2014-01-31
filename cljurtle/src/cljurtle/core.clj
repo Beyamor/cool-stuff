@@ -39,8 +39,8 @@
   [{{:keys [bearing]} :state :as turtle} distance]
   (update-property turtle :position
                    #(-> %
-                      (update-in [:x] + (* distance (Math/cos bearing)))
-                      (update-in [:y] + (* distance (Math/sin bearing))))))
+                      (->/in [:x] (+ (* distance (Math/cos bearing))))
+                      (->/in [:y] (+ (* distance (Math/sin bearing)))))))
 
 (defn move-backward
   [turtle distance]
@@ -62,10 +62,6 @@
   [turtle]
   (set-property turtle :pen-down? false))
 
-(defn state-sequence
-  [{:keys [state history]}]
-  (conj history state))
-
 (defn jump-to
   [turtle x y]
   (-> turtle
@@ -76,3 +72,7 @@
 (defn set-color
   [turtle color]
   (set-property turtle :pen-color color))
+
+(defn state-sequence
+  [{:keys [state history]}]
+  (conj history state))
