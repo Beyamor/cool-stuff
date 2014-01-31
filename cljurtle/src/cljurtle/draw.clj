@@ -12,20 +12,17 @@
                (int from-x) (int from-y)
                (int to-x)   (int to-y))))
 
-(defn- set-color!
-  [{:keys [context]} color]
-  (set! (.-strokeStyle context) color))
+(defn set-color!
+  [graphics c]
+  (.setColor graphics (color c)))
 
 (defn turtle-sequence!
   [graphics width height states]
-  (loop [[current-state & more-states] states]
-    (when (seq more-states)
-      (let [next-state (first more-states)]
-        (when (and (:pen-down? current-state)
-                   (not= (:position current-state)
-                         (:position next-state)))
-          (.setColor graphics (->> current-state :pen-color color))
-          (draw-line! graphics width height
-                      (:position current-state)
-                      (:position next-state)))
-        (recur more-states)))))
+  (doseq [[current-state next-state] (partition 2 1 states)]
+    (when (and (:pen-down? current-state)
+               (not= (:position current-state)
+                     (:position next-state)))
+      (set-color! graphics (:pen-color current-state))
+      (draw-line! graphics width height
+                  (:position current-state)
+                  (:position next-state)))))
