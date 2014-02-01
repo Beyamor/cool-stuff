@@ -47,7 +47,7 @@
                   :paint  (fn [c g]
                             (doseq [turtle @turtles]
                               (draw/turtle-sequence! g width height
-                                                     (core/state-sequence turtle)))))]
+                                       (core/state-sequence turtle)))))]
     (sb/bind turtles
              (sb/b-do [_]
                     (s/repaint! el)))
@@ -57,8 +57,8 @@
   []
   (->
     (s/text
-                      :multi-line?  true
-                      :rows         15)
+      :multi-line?  true
+      :rows         15)
     (doto
       (.setFont (Font. "SansSerif" Font/PLAIN 12)))))
 
@@ -67,8 +67,8 @@
   (s/button
     :text   "run"
     :listen [:action
-                   (fn [_]
-                     (run turtles (s/value script-box)))]))
+             (fn [_]
+               (run turtles (s/value script-box)))]))
 
 (defn -main [& args]
   (let [turtles     (atom [])
