@@ -26,11 +26,8 @@
   (let [v (v/sub (:point ray) (:center sphere))
         a (v/dot direction direction)
         b (* 2 (v/dot v direction))
-        c (- (v/dot v v)
-             (* radius radius))
-        discriminant  (- (* b b)
-                         (* 4 a c))]
-    ; Collision impossibiru
+        c (- (v/dot v v) (* radius radius))
+        discriminant  (- (* b b) (* 4 a c))]
     (when-not (neg? discriminant)
       (let [discriminant-sqrt (Math/sqrt discriminant)
             q (if (neg? b)
@@ -41,9 +38,6 @@
             [t0 t1] (if (> t0 t1)
                       [t1 t0] [t0 t1])]
         (cond
-          ; No collision
           (neg? t1) nil
-          ; t0 doesn't collide
-          (neg? t0) (point-along-ray ray t1)
-          ; t0 collides
-          :else t0) (point-along-ray ray t0)))))
+          (neg? t0) t1
+          :else t0) t0))))
