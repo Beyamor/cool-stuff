@@ -64,15 +64,6 @@
   [view]
   (/ (:width view) (:height view)))
 
-(def scene
-  {:objects [{:shape (create-sphere (v3 0 0 -20) 5)
-              :color Color/RED}]})
-
-(def view
-  {:width 800
-   :height 800
-   :eye {:position (v3 0 0 0)}})
-
 (defn trace
   [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]}]
   (let [aspect-ratio        (/ screen-width screen-height)
@@ -106,3 +97,8 @@
 (defn trace!
   [scene view file-name]
   (-> (trace scene view) (dump-trace! file-name)))
+
+(defn trace-from-file
+  [file-name]
+  (let [{:keys [view scene]} (-> file-name slurp read-string eval)]
+    (trace scene view)))
