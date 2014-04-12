@@ -75,7 +75,7 @@
                    screen-y (range screen-height)
                    :let [x (-> screen-x (- half-screen-width) (/ half-screen-width))
                          y (-> half-screen-height (- screen-y) (/ half-screen-height) (* aspect-ratio))
-                         direction (v/normalize (v3 x y 1))
+                         direction (v/normalize (v3 x y -1))
                          ray (create-ray (:position eye) direction)
                          object (find-collision ray objects)]]
                {:x screen-x :y screen-y
