@@ -61,16 +61,15 @@
       :object))
 
 (def scene
-  {:eye (v3 0 0 20)
-   :objects [{:shape (create-sphere (v3 0 0 -20) 5)
+  {:objects [{:shape (create-sphere (v3 0 0 -20) 5)
               :color Color/RED}]})
 
-(def screen
+(def view
   {:width 800
    :height 600})
 
 (defn trace
-  [{:keys [width height]} {:keys [objects]}]
+  [{:keys [objects]} {:keys [width height]}]
   {:width width
    :height height
    :pixels (for [x (range width)
@@ -93,5 +92,5 @@
     (ImageIO/write image "png" (file (str file-name ".png")))))
 
 (defn trace!
-  [screen scene file-name]
-  (-> (trace screen scene) (dump-trace! file-name)))
+  [scene view file-name]
+  (-> (trace scene view) (dump-trace! file-name)))
