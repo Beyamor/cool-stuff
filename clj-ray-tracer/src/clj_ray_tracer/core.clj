@@ -43,7 +43,7 @@
         (cond
           (neg? t1) nil
           (neg? t0) t1
-          :else t0) t0))))
+          :else t0)))))
 
 (defn collision-info
   [ray {:keys [shape] :as object}]
