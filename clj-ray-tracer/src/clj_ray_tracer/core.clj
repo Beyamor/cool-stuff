@@ -84,12 +84,16 @@
                                (:color object)
                                Color/BLACK)}))})
 
-(defn dump-trace!
-  [{:keys [width height pixels]} file-name]
+(defn generate-image
+  [{:keys [width height pixels]}]
   (let [image (BufferedImage. width height BufferedImage/TYPE_4BYTE_ABGR)]
     (doseq [pixel pixels]
       (.setRGB image (:x pixel) (:y pixel) (.getRGB (:color pixel))))
-    (ImageIO/write image "png" (file (str file-name ".png")))))
+    image))
+
+(defn dump-trace!
+  [trace file-name]
+    (ImageIO/write (generate-image trace) "png" (file (str file-name ".png"))))
 
 (defn trace!
   [scene view file-name]
