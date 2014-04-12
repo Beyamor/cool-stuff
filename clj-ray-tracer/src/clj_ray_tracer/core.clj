@@ -60,29 +60,37 @@
       first
       :object))
 
+(defn aspect-ratio
+  [view]
+  (/ (:width view) (:height view)))
+
 (def scene
   {:objects [{:shape (create-sphere (v3 0 0 -20) 5)
               :color Color/RED}]})
 
 (def view
   {:width 800
-   :height 600})
+   :height 800
+   :eye {:position (v3 0 0 0)}})
 
 (defn trace
-  [{:keys [objects]} {:keys [width height]}]
-  {:width width
-   :height height
-   :pixels (for [x (range width)
-                       y (range height)]
-                   (let [ray (create-ray (v3 (- x (/ width 2))
-                                             (- (/ height 2) y)
-                                             0)
-                                         (v3 0 0 -1))
-                         object (find-collision ray objects)]
-                     {:x x :y y
-                      :color (if object
-                               (:color object)
-                               Color/BLACK)}))})
+  [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]}]
+  (let [aspect-ratio        (/ screen-width screen-height)
+        half-screen-width   (/ screen-width 2)
+        half-screen-height  (/ screen-height 2)]
+    {:width screen-width
+     :height screen-height
+     :pixels (for [screen-x (range screen-width)
+                   screen-y (range screen-height)
+                   :let [x (-> screen-x (- half-screen-width) (/ half-screen-width))
+                         y (-> half-screen-height (- screen-y) (/ half-screen-height) (* aspect-ratio))
+                         direction (v/normalize (v3 x y 1))
+                         ray (create-ray (:position eye) direction)
+                         object (find-collision ray objects)]]
+               {:x screen-x :y screen-y
+                :color (if object
+                         (:color object)
+                         Color/BLACK)})}))
 
 (defn generate-image
   [{:keys [width height pixels]}]
