@@ -1,9 +1,11 @@
 (ns clj-ray-tracer.core
   (:use [clojure.java.io :only [file]])
   (:require [euclidean.math.vector :as v])
-  (:import java.awt.Color
-           java.awt.image.BufferedImage
+  (:import [java.awt Color Toolkit]
+           [java.awt.image BufferedImage MemoryImageSource]
            javax.imageio.ImageIO))
+
+(set! *warn-on-reflection* true)
 
 (defn v3
   [x y z]
@@ -68,11 +70,13 @@
   [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]}]
   (let [aspect-ratio        (/ screen-width screen-height)
         half-screen-width   (/ screen-width 2)
-        half-screen-height  (/ screen-height 2)]
+        half-screen-height  (/ screen-height 2)
+        screen-xs (range screen-width)
+        screen-ys (range screen-height)]
     {:width screen-width
      :height screen-height
-     :pixels (for [screen-x (range screen-width)
-                   screen-y (range screen-height)
+     :pixels (for [screen-x screen-xs
+                   screen-y screen-ys
                    :let [x (-> screen-x (- half-screen-width) (/ half-screen-width))
                          y (-> half-screen-height (- screen-y) (/ half-screen-height) (* aspect-ratio))
                          direction (v/normalize (v3 x y -1))
@@ -80,14 +84,19 @@
                          object (find-collision ray objects)]]
                {:x screen-x :y screen-y
                 :color (if object
-                         (:color object)
-                         Color/BLACK)})}))
+                         (:color object) Color/BLACK
+                         )})}))
 
 (defn generate-image
   [{:keys [width height pixels]}]
   (let [image (BufferedImage. width height BufferedImage/TYPE_4BYTE_ABGR)]
-    (doseq [pixel pixels]
-      (.setRGB image (:x pixel) (:y pixel) (.getRGB (:color pixel))))
+    (->>
+      pixels
+      (partition-all (/ (* width height) 32))
+      (pmap (fn [pixels]
+              (doseq [{:keys [x y ^Color color]} pixels]
+                (->> color .getRGB (.setRGB image x y)))))
+      doall)
     image))
 
 (defn dump-trace!
