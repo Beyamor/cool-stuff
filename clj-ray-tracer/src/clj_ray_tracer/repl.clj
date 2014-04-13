@@ -8,3 +8,7 @@
     (.add (-> trace core/generate-image ImageIcon. JLabel.))
     .pack
     .show))
+
+(defn show-file!
+  [file-name]
+  (-> file-name core/trace-from-file show!))
