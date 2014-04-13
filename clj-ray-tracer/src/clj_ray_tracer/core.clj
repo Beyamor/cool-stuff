@@ -1,6 +1,7 @@
 (ns clj-ray-tracer.core
   (:use [clojure.java.io :only [file]])
-  (:require [euclidean.math.vector :as v])
+  (:require [euclidean.math.vector :as v]
+            [lonocloud.synthread :as ->])
   (:import [java.awt Color Toolkit]
            [java.awt.image BufferedImage MemoryImageSource]
            javax.imageio.ImageIO))
@@ -10,6 +11,18 @@
 (defn v3
   [x y z]
   (v/vector x y z))
+
+(defn add-color
+  [^Color base ^Color color scale]
+  (Color.
+    (-> color .getRed (* scale) (+ (.getRed base)) (min 255) int)
+    (-> color .getGreen (* scale) (+ (.getGreen base)) (min 255) int)
+    (-> color .getBlue (* scale) (+ (.getBlue base)) (min 255) int)))
+
+(defn reflect-around-normal
+  [d normal]
+  (v/sub d
+         (v/scale normal (* 2 (v/dot d normal)))))
 
 (defn create-sphere
   [center radius]
@@ -47,6 +60,13 @@
           (neg? t0) t1
           :else t0)))))
 
+(defn normal-at-point
+  [sphere point]
+  (->
+    point
+    (v/sub (:center sphere))
+    v/normalize))
+
 (defn collision-info
   [ray {:keys [shape] :as object}]
   (when-let [t (intersection shape ray)]
@@ -59,12 +79,35 @@
       (map #(collision-info ray %))
       (filter identity)
       (sort-by :t)
-      first
-      :object))
+      first))
 
 (defn aspect-ratio
   [view]
   (/ (:width view) (:height view)))
+
+(defn shoot-ray-iteration
+  [objects ray recursion-depth]
+  (->
+    Color/BLACK
+    (->/when-let [{:keys [t object]} (find-collision ray objects)]
+      (add-color (object :color) 0.5)
+      (->/when (pos? recursion-depth)
+        (->/let [recur-start (point-along-ray ray t)
+                 normal (normal-at-point (:shape object) recur-start)
+                 recur-direction (reflect-around-normal (:direction ray) normal)]
+          (add-color
+            (shoot-ray-iteration objects
+                                 (create-ray (v/add recur-start recur-direction)
+                                             recur-direction)
+                                 (dec recursion-depth))
+            0.5))))))
+
+(defn shoot-ray
+  [objects position direction]
+  (shoot-ray-iteration
+    objects
+    (create-ray position direction)
+    1))
 
 (defn trace
   [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]}]
@@ -83,9 +126,7 @@
                          ray (create-ray (:position eye) direction)
                          object (find-collision ray objects)]]
                {:x screen-x :y screen-y
-                :color (if object
-                         (:color object) Color/BLACK
-                         )})}))
+                :color (shoot-ray objects (:position eye) direction)})}))
 
 (defn generate-image
   [{:keys [width height pixels]}]
