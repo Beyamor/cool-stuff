@@ -150,5 +150,6 @@
 
 (defn trace-from-file
   [file-name]
-  (let [{:keys [view scene]} (-> file-name slurp read-string eval)]
+  (let [{:keys [view scene]} (binding [*ns* (find-ns 'clj-ray-tracer.core)]
+                               (-> file-name slurp read-string eval))]
     (trace scene view)))
