@@ -175,14 +175,6 @@
       doall)
     image))
 
-(defn dump-trace!
-  [trace file-name]
-    (ImageIO/write (generate-image trace) "png" (file (str file-name ".png"))))
-
-(defn trace!
-  [scene view file-name]
-  (-> (trace scene view) (dump-trace! file-name)))
-
 (defn trace-from-file
   [file-name]
   (let [{:keys [view scene parameters]} (binding [*ns* (find-ns 'clj-ray-tracer.core)]
