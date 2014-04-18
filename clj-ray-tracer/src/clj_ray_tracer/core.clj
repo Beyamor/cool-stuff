@@ -32,8 +32,8 @@
   [center radius]
   Shape
   (intersection
-    [{:keys [radius] :as sphere} {:keys [direction] :as ray}]
-    (let [v (v/sub (:point ray) (:center sphere))
+    [_ {:keys [direction] :as ray}]
+    (let [v (v/sub (:point ray) center)
           a (v/dot direction direction)
           b (* 2 (v/dot v direction))
           c (- (v/dot v v) (* radius radius))
@@ -53,12 +53,28 @@
             :else t0)))))
 
   (normal-at-point
-    [sphere point]
+    [_ point]
     (-> point
-      (v/sub (:center sphere))
+      (v/sub center)
       v/normalize)))
 
 (def create-sphere ->Sphere)
+
+(defrecord Plane
+  [point normal]
+  Shape
+  (intersection
+    [_ ray]
+    (let [num   (-> point (v/sub (:point ray)) (v/dot normal))
+          denom (v/dot (:direction ray) normal)]
+      (cond
+        (and (zero? num) (zero? denom)) 0
+        (zero? denom)                   nil
+        :else                           (/ num denom))))
+
+  (normal-at-point
+    [_ point]
+    normal))
 
 (defn create-ray
   [point direction]
@@ -69,7 +85,6 @@
   [{:keys [point direction]} t]
   (v/add point
          (v/scale direction t)))
-
 
 (defn collision-info
   [ray {:keys [shape] :as object}]
@@ -82,6 +97,7 @@
   (->> objects
       (map #(collision-info ray %))
       (filter identity)
+      (filter #(-> % :t pos?))
       (sort-by :t)
       first))
 
