@@ -103,11 +103,12 @@
             0.5))))))
 
 (defn shoot-ray
-  [objects position direction]
+  [objects position direction {:keys [recursion-depth]
+                               :or {recursion-depth 0}}]
   (shoot-ray-iteration
     objects
     (create-ray position direction)
-    1))
+    recursion-depth))
 
 (defn pixel-coordinates
   [screen-width screen-height]
@@ -120,15 +121,13 @@
 (def half #(/ % 2))
 
 (defn trace-pixel
-  [objects screen-width screen-height eye [screen-x screen-y]]
+  [objects screen-width screen-height eye parameters [screen-x screen-y]]
   (let [aspect-ratio (/ screen-width screen-height)
         x (-> screen-x (- (half screen-width)) (/ (half screen-width)))
         y (-> (half screen-height) (- screen-y) (/ (half screen-height)) (* aspect-ratio))
-        direction (v/normalize (v3 x y -1))
-        ray (create-ray (:position eye) direction)
-        object (find-collision ray objects)]
+        direction (v/normalize (v3 x y -1))]
     {:x screen-x :y screen-y
-     :color (shoot-ray objects (:position eye) direction)}))
+     :color (shoot-ray objects (:position eye) direction parameters)}))
 
 (defn pmap!
   [f coll]
@@ -138,14 +137,14 @@
        (map deref)))
 
 (defn trace
-  [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]}]
+  [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]} parameters]
   {:width screen-width
    :height screen-height
    :pixels (->> (pixel-coordinates screen-width screen-height)
                 (partition-all (/ (* screen-width screen-height) 8))
                 (pmap! #(->> %
                              (map (partial trace-pixel
-                                           objects screen-width screen-height eye))
+                                           objects screen-width screen-height eye parameters))
                              doall))
                 (apply concat))})
 
@@ -171,6 +170,6 @@
 
 (defn trace-from-file
   [file-name]
-  (let [{:keys [view scene]} (binding [*ns* (find-ns 'clj-ray-tracer.core)]
+  (let [{:keys [view scene parameters]} (binding [*ns* (find-ns 'clj-ray-tracer.core)]
                                (-> file-name slurp read-string eval))]
-    (trace scene view)))
+    (trace scene view parameters)))
