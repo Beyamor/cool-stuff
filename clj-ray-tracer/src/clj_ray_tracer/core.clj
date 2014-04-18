@@ -156,7 +156,7 @@
   {:width screen-width
    :height screen-height
    :pixels (->> (pixel-coordinates screen-width screen-height)
-                (partition-all (/ (* screen-width screen-height) 8))
+                (partition-all 80000)
                 (pmap! #(->> %
                              (map (partial trace-pixel
                                            objects screen-width screen-height eye parameters))
@@ -168,10 +168,10 @@
   (let [image (BufferedImage. width height BufferedImage/TYPE_4BYTE_ABGR)]
     (->>
       pixels
-      (partition-all (/ (* width height) 32))
-      (pmap (fn [pixels]
-              (doseq [{:keys [x y ^Color color]} pixels]
-                (->> color .getRGB (.setRGB image x y)))))
+      (partition-all 80000)
+      (pmap! (fn [pixels]
+               (doseq [{:keys [x y ^Color color]} pixels]
+                 (->> color .getRGB (.setRGB image x y)))))
       doall)
     image))
 
