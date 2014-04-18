@@ -81,10 +81,6 @@
       (sort-by :t)
       first))
 
-(defn aspect-ratio
-  [view]
-  (/ (:width view) (:height view)))
-
 (defn shoot-ray-iteration
   [objects ray recursion-depth]
   (->
@@ -122,9 +118,8 @@
 
 (defn trace-pixel
   [objects screen-width screen-height eye parameters [screen-x screen-y]]
-  (let [aspect-ratio (/ screen-width screen-height)
-        x (-> screen-x (- (half screen-width)) (/ (half screen-width)))
-        y (-> (half screen-height) (- screen-y) (/ (half screen-height)) (* aspect-ratio))
+  (let [x (-> screen-x (- (half screen-width)) (/ (half screen-width)))
+        y (-> (half screen-height) (- screen-y) (/ (half screen-height)))
         direction (v/normalize (v3 x y -1))]
     {:x screen-x :y screen-y
      :color (shoot-ray objects (:position eye) direction parameters)}))
