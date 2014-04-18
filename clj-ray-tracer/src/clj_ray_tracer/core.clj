@@ -109,24 +109,45 @@
     (create-ray position direction)
     1))
 
+(defn pixel-coordinates
+  [screen-width screen-height]
+  (let [screen-xs (range screen-width)
+        screen-ys (range screen-height)]
+    (for [screen-x screen-xs
+          screen-y screen-ys]
+      [screen-x screen-y])))
+
+(def half #(/ % 2))
+
+(defn trace-pixel
+  [objects screen-width screen-height eye [screen-x screen-y]]
+  (let [aspect-ratio (/ screen-width screen-height)
+        x (-> screen-x (- (half screen-width)) (/ (half screen-width)))
+        y (-> (half screen-height) (- screen-y) (/ (half screen-height)) (* aspect-ratio))
+        direction (v/normalize (v3 x y -1))
+        ray (create-ray (:position eye) direction)
+        object (find-collision ray objects)]
+    {:x screen-x :y screen-y
+     :color (shoot-ray objects (:position eye) direction)}))
+
+(defn pmap!
+  [f coll]
+  (->> coll
+       (map #(future (f %)))
+       doall
+       (map deref)))
+
 (defn trace
   [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]}]
-  (let [aspect-ratio        (/ screen-width screen-height)
-        half-screen-width   (/ screen-width 2)
-        half-screen-height  (/ screen-height 2)
-        screen-xs (range screen-width)
-        screen-ys (range screen-height)]
-    {:width screen-width
-     :height screen-height
-     :pixels (for [screen-x screen-xs
-                   screen-y screen-ys
-                   :let [x (-> screen-x (- half-screen-width) (/ half-screen-width))
-                         y (-> half-screen-height (- screen-y) (/ half-screen-height) (* aspect-ratio))
-                         direction (v/normalize (v3 x y -1))
-                         ray (create-ray (:position eye) direction)
-                         object (find-collision ray objects)]]
-               {:x screen-x :y screen-y
-                :color (shoot-ray objects (:position eye) direction)})}))
+  {:width screen-width
+   :height screen-height
+   :pixels (->> (pixel-coordinates screen-width screen-height)
+                (partition-all (/ (* screen-width screen-height) 8))
+                (pmap! #(->> %
+                             (map (partial trace-pixel
+                                           objects screen-width screen-height eye))
+                             doall))
+                (apply concat))})
 
 (defn generate-image
   [{:keys [width height pixels]}]
