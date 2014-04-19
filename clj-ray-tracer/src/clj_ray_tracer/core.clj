@@ -12,12 +12,30 @@
   [x y z]
   (v/vector x y z))
 
-(defn add-color
+(defn add-scaled-color
   [^Color base ^Color color scale]
   (Color.
-    (-> color .getRed (* scale) (+ (.getRed base)) (min 255) int)
-    (-> color .getGreen (* scale) (+ (.getGreen base)) (min 255) int)
-    (-> color .getBlue (* scale) (+ (.getBlue base)) (min 255) int)))
+    (-> color .getRed   (* scale) (+ (.getRed base))    (min 255) int)
+    (-> color .getGreen (* scale) (+ (.getGreen base))  (min 255) int)
+    (-> color .getBlue  (* scale) (+ (.getBlue base))   (min 255) int)))
+
+(defn add-color
+  [base color]
+  (add-scaled-color base color 1))
+
+(defn scale-color
+  [^Color color scale]
+  (Color.
+    (-> color .getRed   (* scale) (min 255) int)
+    (-> color .getGreen (* scale) (min 255) int)
+    (-> color .getBlue  (* scale) (min 255) int)))
+
+(defn multiply-colors
+  [^Color base ^Color color]
+  (Color.
+    (-> color .getRed   (* (.getRed base))    (/ 255) (min 255) int)
+    (-> color .getGreen (* (.getGreen base))  (/ 255) (min 255) int)
+    (-> color .getBlue  (* (.getBlue base))   (/ 255) (min 255) int)))
 
 (defn reflect-around-normal
   [d normal]
@@ -101,30 +119,41 @@
       (sort-by :t)
       first))
 
+(defn calculate-diffuse
+  [object scene collision-point normal]
+  (reduce (fn [total-diffuse light]
+            (let [light-direction (-> light :position (v/sub collision-point) v/normalize)
+                  shade           (-> light-direction (v/dot normal) (max 0))]
+              (add-color total-diffuse
+                         (-> (:color object) (multiply-colors (:color light)) (scale-color shade)))))
+          Color/BLACK (:lights scene)))
+
 (defn shoot-ray-iteration
-  [objects ray recursion-depth]
-  (->
-    Color/BLACK
-    (->/when-let [{:keys [t object]} (find-collision ray objects)]
-      (add-color (object :color) 0.5)
-      (->/when (pos? recursion-depth)
-        (->/let [recur-start (point-along-ray ray t)
-                 normal (normal-at-point (:shape object) recur-start)
-                 recur-direction (reflect-around-normal (:direction ray) normal)]
-          (add-color
-            (shoot-ray-iteration objects
-                                 (create-ray (v/add recur-start recur-direction)
-                                             recur-direction)
-                                 (dec recursion-depth))
-            0.5))))))
+  [{:keys [objects] :as scene} ray recursion-depth k]
+  (-> Color/BLACK
+      (->/when-let [{:keys [t object]} (find-collision ray objects)]
+        (->/let [collision-point  (point-along-ray ray t)
+                 normal           (normal-at-point (:shape object) collision-point)
+                 ambient          (:color object)
+                 diffuse          (-> (calculate-diffuse object scene collision-point normal))]
+          (add-scaled-color ambient (:ambient k))
+          (add-scaled-color diffuse (:diffuse k))
+          (->/when (pos? recursion-depth)
+            (->/let [reflection-direction (reflect-around-normal (:direction ray) normal)]
+              (add-scaled-color
+                (shoot-ray-iteration scene
+                                     (create-ray (v/add collision-point reflection-direction)
+                                                 reflection-direction)
+                                     (dec recursion-depth) k)
+              0.5)))))))
 
 (defn shoot-ray
-  [objects position direction {:keys [recursion-depth]
+  [scene position direction {:keys [recursion-depth k]
                                :or {recursion-depth 0}}]
   (shoot-ray-iteration
-    objects
+    scene
     (create-ray position direction)
-    recursion-depth))
+    recursion-depth k))
 
 (defn pixel-coordinates
   [screen-width screen-height]
@@ -137,12 +166,12 @@
 (def half #(/ % 2))
 
 (defn trace-pixel
-  [objects screen-width screen-height eye parameters [screen-x screen-y]]
+  [scene {screen-width :width screen-height :height :keys [eye]} parameters [screen-x screen-y]]
   (let [x (-> screen-x (- (half screen-width)) (/ (half screen-width)))
         y (-> (half screen-height) (- screen-y) (/ (half screen-height)))
         direction (v/normalize (v3 x y -1))]
     {:x screen-x :y screen-y
-     :color (shoot-ray objects (:position eye) direction parameters)}))
+     :color (shoot-ray scene (:position eye) direction parameters)}))
 
 (defn pmap!
   [f coll]
@@ -152,14 +181,13 @@
        (map deref)))
 
 (defn trace
-  [{:keys [objects]} {screen-width :width screen-height :height :keys [eye]} parameters]
-  {:width screen-width
-   :height screen-height
-   :pixels (->> (pixel-coordinates screen-width screen-height)
+  [scene {:keys [width height] :as view} parameters]
+  {:width width
+   :height height
+   :pixels (->> (pixel-coordinates width height)
                 (partition-all 80000)
                 (pmap! #(->> %
-                             (map (partial trace-pixel
-                                           objects screen-width screen-height eye parameters))
+                             (map (partial trace-pixel scene view parameters))
                              doall))
                 (apply concat))})
 
