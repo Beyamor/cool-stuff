@@ -3,68 +3,13 @@
         tracer.util)
   (:require [euclidean.math.vector :as v]
             [lonocloud.synthread :as ->]
-            [tracer.color :as color])
-  (:import [java.awt Toolkit]
+            [tracer.color :as color]
+            [tracer.shapes :as shape])
+  (:import [java.awt Color Toolkit]
            [java.awt.image BufferedImage MemoryImageSource]
            javax.imageio.ImageIO))
 
 (set! *warn-on-reflection* true)
-
-(defprotocol Shape
-  (intersection [shape ray])
-  (normal-at-point [shape point]))
-
-(defrecord Sphere [center radius]
-  Shape
-  (intersection
-    [_ {:keys [direction] :as ray}]
-    (let [v (v/sub (:point ray) center)
-          a (v/dot direction direction)
-          b (* 2 (v/dot v direction))
-          c (- (v/dot v v) (* radius radius))
-          discriminant  (- (* b b) (* 4 a c))]
-      (when-not (neg? discriminant)
-        (let [discriminant-sqrt (Math/sqrt discriminant)
-              q (if (neg? b)
-                  (/ (- (- b) discriminant-sqrt) 2)
-                  (/ (+ (- b) discriminant-sqrt) 2))
-              t0 (/ q a)
-              t1 (/ c q)
-              [t0 t1] (if (> t0 t1)
-                        [t1 t0] [t0 t1])]
-          (cond
-            (neg? t1) nil
-            (neg? t0) t1
-            :else t0)))))
-
-  (normal-at-point
-    [_ point]
-    (-> point
-        (v/sub center)
-        v/normalize)))
-
-(defn create-sphere
-  [{:keys [center radius]}]
-  (->Sphere (v/into-vector center) radius))
-
-(defrecord Plane [point normal]
-  Shape
-  (intersection
-    [_ ray]
-    (let [num   (-> point (v/sub (:point ray)) (v/dot normal))
-          denom (v/dot (:direction ray) normal)]
-      (cond
-        (and (zero? num) (zero? denom)) 0
-        (zero? denom)                   nil
-        :else                           (/ num denom))))
-
-  (normal-at-point
-    [_ point]
-    normal))
-
-(defn create-plane
-  [{:keys [point normal]}]
-  (->Plane (v/into-vector point) (v/normalize (v/into-vector normal))))
 
 (defn create-ray
   [point direction]
@@ -77,7 +22,7 @@
 
 (defn collision-info
   [ray {:keys [shape] :as object}]
-  (when-let [t (intersection shape ray)]
+  (when-let [t (shape/intersection shape ray)]
     {:t t
      :object object}))
 
@@ -120,7 +65,7 @@
   (-> Color/BLACK
       (->/when-let [{:keys [t object]}  (find-collision ray objects)]
         (->/let [collision-point        (point-along-ray ray t)
-                 normal                 (normal-at-point (:shape object) collision-point)
+                 normal                 (shape/normal-at-point (:shape object) collision-point)
                  ambient                (:color object)
                  [diffuse specular]     (calculate-diffuse-and-specular object scene eye collision-point normal)]
           (color/add-scaled ambient (:ambient k))
@@ -158,7 +103,7 @@
 (defn trace-pixel
   [scene {screen-width :width screen-height :height :keys [eye]} parameters [pixel-x pixel-y]]
   {:x pixel-x :y pixel-y
-   :color (average-color
+   :color (color/average
             (for [[x-offset y-offset] (-> parameters :antialiasing ray-offsets)
                   :let [x (-> (+ pixel-x x-offset) (- (half screen-width)) (/ (half screen-width)))
                         y (-> (half screen-height) (- (+ pixel-y y-offset)) (/ (half screen-height)))

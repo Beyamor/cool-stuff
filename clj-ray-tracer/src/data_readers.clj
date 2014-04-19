@@ -1,3 +1,3 @@
-{tracer/sphere tracer.core/create-sphere
- tracer/plane tracer.core/create-plane
- tracer/color tracer.core/create-color}
+{tracer/sphere tracer.shapes/create-sphere
+ tracer/plane tracer.shapes/create-plane
+ tracer/color tracer.color/parse}
