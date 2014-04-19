@@ -49,7 +49,7 @@
                                                    (-> n-dot-l
                                                        (->/when shadowed?
                                                          (* 0.5))))
-                      specular        (color/scale Color/WHITE
+                      specular        (color/scale (:color light)
                                                    (-> light-direction
                                                        (v/scale -1)
                                                        (reflect-around normal)
