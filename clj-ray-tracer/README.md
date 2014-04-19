@@ -1,13 +1,9 @@
-# clj-ray-tracer
+# Clojure Ray Tracer
 
-A Clojure library designed to ... well, that part is up to you.
+A ray tracer in Clojure inspired by [Lee Gauthie](https://github.com/lgauthie)'s [Haskell one](https://github.com/lgauthie/hsRayTracer).
+
+![screenshot](http://i.imgur.com/97P9eAu.png?1)
 
 ## Usage
 
-FIXME
-
-## License
-
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.
+`lein run <input-file-name> <output-file-name>`
