@@ -1,8 +1,9 @@
 (ns tracer.core
   (:use [clojure.java.io :only [file]])
   (:require [euclidean.math.vector :as v]
-            [lonocloud.synthread :as ->])
-  (:import [java.awt Color Toolkit]
+            [lonocloud.synthread :as ->]
+            [tracer.color :as color])
+  (:import [java.awt Toolkit]
            [java.awt.image BufferedImage MemoryImageSource]
            javax.imageio.ImageIO))
 
@@ -11,51 +12,6 @@
 (defn v3
   [x y z]
   (v/vector x y z))
-
-(defmethod print-dup java.awt.Color
-  [^Color color ^java.io.Writer stream]
-  (.write stream
-          (str "#=(java.awt.Color. " (.getRGB color) ")")))
-
-(defn ->color
-  [r g b]
-  (Color. (-> r (min 255) int)
-          (-> g (min 255) int)
-          (-> b (min 255) int)))
-
-(defn create-color
-  [color-name]
-  (-> Color (.getField color-name) (.get nil)))
-
-(defn color-binop
-  [op ^Color c1 ^Color c2]
-  (->color (op (.getRed c1) (.getRed c2))
-           (op (.getGreen c1) (.getGreen c2))
-           (op (.getBlue c1) (.getBlue c2))))
-
-(def add-color (partial color-binop +))
-(def multiply-colors (partial color-binop *))
-
-(defn scale-color
-  [^Color color scale]
-  (->color (-> color .getRed   (* scale))
-           (-> color .getGreen (* scale))
-           (-> color .getBlue  (* scale))))
-
-(defn add-scaled-color
-  [base color scale]
-  (add-color base (scale-color color scale)))
-
-(defn average-color
-  [colors]
-  (let [[r g b] (reduce (fn [[r g b] ^Color color]
-                          [(+ r (.getRed color))
-                           (+ g (.getGreen color))
-                           (+ b (.getBlue color))])
-                        [0 0 0] colors)]
-    (->color (/ r (count colors))
-             (/ g (count colors))
-             (/ b (count colors)))))
 
 (defn reflect-around
   [d normal]
@@ -152,19 +108,19 @@
                       shadowed?       (-> (create-ray (v/add collision-point normal)
                                                       light-direction)
                                           (find-collision (:objects scene)))
-                      diffuse         (scale-color (multiply-colors (:color light) (:color object))
+                      diffuse         (color/scale (color/multiply (:color light) (:color object))
                                                    (-> n-dot-l
                                                        (->/when shadowed?
                                                          (* 0.5))))
-                      specular        (scale-color Color/WHITE
+                      specular        (color/scale Color/WHITE
                                                    (-> light-direction
                                                        (v/scale -1)
                                                        (reflect-around normal)
                                                        (v/dot eye-direction)
                                                        (max 0)
                                                        (Math/pow 8)))]
-                  [(add-color total-diffuse diffuse)
-                   (add-color total-specular specular)]))))
+                  [(color/add total-diffuse diffuse)
+                   (color/add total-specular specular)]))))
           [Color/BLACK Color/BLACK] (:lights scene)))
 
 (defn shoot-ray-iteration
@@ -175,16 +131,16 @@
                  normal                 (normal-at-point (:shape object) collision-point)
                  ambient                (:color object)
                  [diffuse specular]     (calculate-diffuse-and-specular object scene eye collision-point normal)]
-          (add-scaled-color ambient (:ambient k))
-          (add-scaled-color diffuse (:diffuse k))
-          (add-scaled-color specular (:specular k))
+          (color/add-scaled ambient (:ambient k))
+          (color/add-scaled diffuse (:diffuse k))
+          (color/add-scaled specular (:specular k))
           (->/when (pos? reflection-depth)
             (->/let [reflection-direction (-> ray :direction (reflect-around normal))
                      reflection-ray       (create-ray (v/add collision-point normal)
                                                       reflection-direction)
                      reflection-color     (shoot-ray-iteration reflection-ray
                                                                scene eye (dec reflection-depth) k)]
-              (add-scaled-color reflection-color 0.2)))))))
+              (color/add-scaled reflection-color 0.2)))))))
 
 (defn shoot-ray
   [scene eye direction {:keys [reflection-depth k]
