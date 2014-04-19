@@ -121,7 +121,13 @@
               (if (< n-dot-l 0)
                 [total-diffuse total-specular]
                 (let [eye-direction   (-> (:position eye) (v/sub collision-point) v/normalize)
-                      diffuse         (scale-color (multiply-colors (:color light) (:color object)) n-dot-l)
+                      shadowed?       (-> (create-ray (v/add collision-point normal)
+                                                      light-direction)
+                                        (find-collision (:objects scene)))
+                      diffuse         (scale-color (multiply-colors (:color light) (:color object))
+                                                   (-> n-dot-l
+                                                       (->/when shadowed?
+                                                         (* 0.5))))
                       specular        (scale-color Color/WHITE
                                                    (-> light-direction
                                                        (v/scale -1)
