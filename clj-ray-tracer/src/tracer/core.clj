@@ -130,7 +130,7 @@
       (pmap! (fn [pixels]
                (doseq [{:keys [x y ^Color color]} pixels]
                  (->> color .getRGB (.setRGB image x y)))))
-      doall)
+      dorun)
     image))
 
 (defn trace-from-file
