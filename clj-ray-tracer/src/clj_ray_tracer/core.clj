@@ -37,6 +37,17 @@
   [base color scale]
   (add-color base (scale-color color scale)))
 
+(defn average-color
+  [colors]
+  (let [[r g b] (reduce (fn [[r g b] ^Color color]
+                          [(+ r (.getRed color))
+                           (+ g (.getGreen color))
+                           (+ b (.getBlue color))])
+                        [0 0 0] colors)]
+    (->color (/ r (count colors))
+             (/ g (count colors))
+             (/ b (count colors)))))
+
 (defn reflect-around
   [d normal]
   (v/sub d
@@ -167,21 +178,29 @@
 
 (defn pixel-coordinates
   [screen-width screen-height]
-  (let [screen-xs (range screen-width)
-        screen-ys (range screen-height)]
-    (for [screen-x screen-xs
-          screen-y screen-ys]
-      [screen-x screen-y])))
+  (let [pixel-xs (range screen-width)
+        pixel-ys (range screen-height)]
+    (for [pixel-x pixel-xs
+          pixel-y pixel-ys]
+      [pixel-x pixel-y])))
 
 (def half #(/ % 2))
 
+(defn ray-offsets
+  [antialiasing-on?]
+  (if antialiasing-on?
+    [[0.5 0.5] [0.5 0] [0.5 1] [0 0.5] [1 0.5]]
+    [[0.5 0.5]]))
+
 (defn trace-pixel
-  [scene {screen-width :width screen-height :height :keys [eye]} parameters [screen-x screen-y]]
-  (let [x (-> screen-x (- (half screen-width)) (/ (half screen-width)))
-        y (-> (half screen-height) (- screen-y) (/ (half screen-height)))
-        direction (v/normalize (v3 x y -1))]
-    {:x screen-x :y screen-y
-     :color (shoot-ray scene eye direction parameters)}))
+  [scene {screen-width :width screen-height :height :keys [eye]} parameters [pixel-x pixel-y]]
+  {:x pixel-x :y pixel-y
+   :color (average-color
+            (for [[x-offset y-offset] (-> parameters :antialiasing ray-offsets)
+                  :let [x (-> (+ pixel-x x-offset) (- (half screen-width)) (/ (half screen-width)))
+                        y (-> (half screen-height) (- (+ pixel-y y-offset)) (/ (half screen-height)))
+                        direction (v/normalize (v3 x y -1))]]
+              (shoot-ray scene eye direction parameters)))})
 
 (defn pmap!
   [f coll]
