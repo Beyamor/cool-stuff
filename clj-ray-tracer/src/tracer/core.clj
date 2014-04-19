@@ -5,9 +5,8 @@
             [lonocloud.synthread :as ->]
             [tracer.color :as color]
             [tracer.shapes :as shape])
-  (:import [java.awt Color Toolkit]
-           [java.awt.image BufferedImage MemoryImageSource]
-           javax.imageio.ImageIO))
+  (:import java.awt.Color
+           java.awt.image.BufferedImage))
 
 (set! *warn-on-reflection* true)
 
