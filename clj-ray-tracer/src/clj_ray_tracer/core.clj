@@ -18,11 +18,14 @@
           (-> g (min 255) int)
           (-> b (min 255) int)))
 
-(defn add-color
-  [^Color base ^Color color]
-  (->color (-> color .getRed   (+ (.getRed base)))
-           (-> color .getGreen (+ (.getGreen base)))
-           (-> color .getBlue  (+ (.getBlue base)))))
+(defn color-binop
+  [op ^Color c1 ^Color c2]
+  (->color (op (.getRed c1) (.getRed c2))
+           (op (.getGreen c1) (.getGreen c2))
+           (op (.getBlue c1) (.getBlue c2))))
+
+(def add-color (partial color-binop +))
+(def multiply-colors (partial color-binop *))
 
 (defn scale-color
   [^Color color scale]
@@ -34,12 +37,6 @@
   [base color scale]
   (add-color base (scale-color color scale)))
 
-(defn multiply-colors
-  [^Color base ^Color color]
-  (->color (-> color .getRed   (* (.getRed base)))
-           (-> color .getGreen (* (.getGreen base)))
-           (-> color .getBlue  (* (.getBlue base)))))
-
 (defn reflect-around-normal
   [d normal]
   (v/sub d
@@ -49,8 +46,7 @@
   (intersection [shape ray])
   (normal-at-point [shape point]))
 
-(defrecord Sphere
-  [center radius]
+(defrecord Sphere [center radius]
   Shape
   (intersection
     [_ {:keys [direction] :as ray}]
@@ -79,10 +75,7 @@
       (v/sub center)
       v/normalize)))
 
-(def create-sphere ->Sphere)
-
-(defrecord Plane
-  [point normal]
+(defrecord Plane [point normal]
   Shape
   (intersection
     [_ ray]
@@ -104,8 +97,7 @@
 
 (defn point-along-ray
   [{:keys [point direction]} t]
-  (v/add point
-         (v/scale direction t)))
+  (->> t (v/scale direction) (v/add point)))
 
 (defn collision-info
   [ray {:keys [shape] :as object}]
@@ -117,8 +109,7 @@
   [ray objects]
   (->> objects
       (map #(collision-info ray %))
-      (filter identity)
-      (filter #(-> % :t pos?))
+      (filter #(and % (-> % :t pos?)))
       (sort-by :t)
       first))
 
