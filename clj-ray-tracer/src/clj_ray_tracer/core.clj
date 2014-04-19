@@ -37,10 +37,10 @@
   [base color scale]
   (add-color base (scale-color color scale)))
 
-(defn reflect-around-normal
+(defn reflect-around
   [d normal]
   (v/sub d
-         (v/scale normal (* 2 (v/dot d normal)))))
+         (->> (v/dot normal d) (* 2) (v/scale normal))))
 
 (defprotocol Shape
   (intersection [shape ray])
@@ -113,41 +113,51 @@
       (sort-by :t)
       first))
 
-(defn calculate-diffuse
-  [object scene collision-point normal]
-  (reduce (fn [total-diffuse light]
-            (let [light-direction (-> light :position (v/sub collision-point) v/normalize)
-                  shade           (-> light-direction (v/dot normal) (max 0))]
-              (add-color total-diffuse
-                         (-> (:color object) (multiply-colors (:color light)) (scale-color shade)))))
-          Color/BLACK (:lights scene)))
+(defn calculate-diffuse-and-specular
+  [object scene eye collision-point normal]
+  (reduce (fn [[total-diffuse total-specular] light]
+            (let [light-direction (-> (:position light) (v/sub collision-point) v/normalize)
+                  n-dot-l         (v/dot light-direction normal)]
+              (if (< n-dot-l 0)
+                [total-diffuse total-specular]
+                (let [eye-direction   (-> (:position eye) (v/sub collision-point) v/normalize)
+                      diffuse         (scale-color (multiply-colors (:color light) (:color object)) n-dot-l)
+                      specular        (scale-color Color/WHITE
+                                                   (-> light-direction
+                                                       (v/scale -1)
+                                                       (reflect-around normal)
+                                                       (v/dot eye-direction)
+                                                       (max 0)
+                                                       (Math/pow 8)))]
+                  [(add-color total-diffuse diffuse)
+                   (add-color total-specular specular)]))))
+          [Color/BLACK Color/BLACK] (:lights scene)))
 
 (defn shoot-ray-iteration
-  [{:keys [objects] :as scene} ray recursion-depth k]
+  [ray {:keys [objects] :as scene} eye recursion-depth k]
   (-> Color/BLACK
-      (->/when-let [{:keys [t object]} (find-collision ray objects)]
-        (->/let [collision-point  (point-along-ray ray t)
-                 normal           (normal-at-point (:shape object) collision-point)
-                 ambient          (:color object)
-                 diffuse          (-> (calculate-diffuse object scene collision-point normal))]
+      (->/when-let [{:keys [t object]}  (find-collision ray objects)]
+        (->/let [collision-point        (point-along-ray ray t)
+                 normal                 (normal-at-point (:shape object) collision-point)
+                 ambient                (:color object)
+                 [diffuse specular]     (calculate-diffuse-and-specular object scene eye collision-point normal)]
           (add-scaled-color ambient (:ambient k))
           (add-scaled-color diffuse (:diffuse k))
+          (add-scaled-color specular (:specular k))
           (->/when (pos? recursion-depth)
-            (->/let [reflection-direction (reflect-around-normal (:direction ray) normal)]
-              (add-scaled-color
-                (shoot-ray-iteration scene
-                                     (create-ray (v/add collision-point reflection-direction)
-                                                 reflection-direction)
-                                     (dec recursion-depth) k)
-              0.5)))))))
+            (->/let [reflection-direction (-> ray :direction (reflect-around normal))
+                     reflection-ray       (create-ray (v/add collision-point normal)
+                                                      reflection-direction)
+                     reflection-color     (shoot-ray-iteration reflection-ray
+                                                               scene eye (dec recursion-depth) k)]
+              (add-scaled-color reflection-color 0.5)))))))
 
 (defn shoot-ray
-  [scene position direction {:keys [recursion-depth k]
+  [scene eye direction {:keys [recursion-depth k]
                                :or {recursion-depth 0}}]
   (shoot-ray-iteration
-    scene
-    (create-ray position direction)
-    recursion-depth k))
+    (create-ray (:position eye) direction)
+    scene eye recursion-depth k))
 
 (defn pixel-coordinates
   [screen-width screen-height]
@@ -165,7 +175,7 @@
         y (-> (half screen-height) (- screen-y) (/ (half screen-height)))
         direction (v/normalize (v3 x y -1))]
     {:x screen-x :y screen-y
-     :color (shoot-ray scene (:position eye) direction parameters)}))
+     :color (shoot-ray scene eye direction parameters)}))
 
 (defn pmap!
   [f coll]
