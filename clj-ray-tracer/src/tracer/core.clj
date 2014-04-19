@@ -1,4 +1,4 @@
-(ns clj-ray-tracer.core
+(ns tracer.core
   (:use [clojure.java.io :only [file]])
   (:require [euclidean.math.vector :as v]
             [lonocloud.synthread :as ->])
@@ -251,6 +251,6 @@
 
 (defn trace-from-file
   [file-name]
-  (let [{:keys [view scene parameters]} (binding [*ns* (find-ns 'clj-ray-tracer.core)]
+  (let [{:keys [view scene parameters]} (binding [*ns* (find-ns 'tracer.core)]
                                           (-> file-name slurp read-string eval))]
     (trace scene view parameters)))

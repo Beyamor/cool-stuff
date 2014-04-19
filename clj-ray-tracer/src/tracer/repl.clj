@@ -1,5 +1,5 @@
-(ns clj-ray-tracer.repl
-  (:require [clj-ray-tracer.core :as core])
+(ns tracer.repl
+  (:require [tracer.core :as core])
   (:import [javax.swing JFrame ImageIcon JLabel]))
 
 (defn show!
