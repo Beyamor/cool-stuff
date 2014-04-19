@@ -83,8 +83,8 @@
   (normal-at-point
     [_ point]
     (-> point
-      (v/sub center)
-      v/normalize)))
+        (v/sub center)
+        v/normalize)))
 
 (defrecord Plane [point normal]
   Shape
@@ -119,10 +119,10 @@
 (defn find-collision
   [ray objects]
   (->> objects
-      (map #(collision-info ray %))
-      (filter #(and % (-> % :t pos?)))
-      (sort-by :t)
-      first))
+       (map #(collision-info ray %))
+       (filter #(and % (-> % :t pos?)))
+       (sort-by :t)
+       first))
 
 (defn calculate-diffuse-and-specular
   [object scene eye collision-point normal]
@@ -134,7 +134,7 @@
                 (let [eye-direction   (-> (:position eye) (v/sub collision-point) v/normalize)
                       shadowed?       (-> (create-ray (v/add collision-point normal)
                                                       light-direction)
-                                        (find-collision (:objects scene)))
+                                          (find-collision (:objects scene)))
                       diffuse         (scale-color (multiply-colors (:color light) (:color object))
                                                    (-> n-dot-l
                                                        (->/when shadowed?
@@ -151,7 +151,7 @@
           [Color/BLACK Color/BLACK] (:lights scene)))
 
 (defn shoot-ray-iteration
-  [ray {:keys [objects] :as scene} eye recursion-depth k]
+  [ray {:keys [objects] :as scene} eye reflection-depth k]
   (-> Color/BLACK
       (->/when-let [{:keys [t object]}  (find-collision ray objects)]
         (->/let [collision-point        (point-along-ray ray t)
@@ -161,20 +161,20 @@
           (add-scaled-color ambient (:ambient k))
           (add-scaled-color diffuse (:diffuse k))
           (add-scaled-color specular (:specular k))
-          (->/when (pos? recursion-depth)
+          (->/when (pos? reflection-depth)
             (->/let [reflection-direction (-> ray :direction (reflect-around normal))
                      reflection-ray       (create-ray (v/add collision-point normal)
                                                       reflection-direction)
                      reflection-color     (shoot-ray-iteration reflection-ray
-                                                               scene eye (dec recursion-depth) k)]
-              (add-scaled-color reflection-color 0.5)))))))
+                                                               scene eye (dec reflection-depth) k)]
+              (add-scaled-color reflection-color 0.2)))))))
 
 (defn shoot-ray
-  [scene eye direction {:keys [recursion-depth k]
-                               :or {recursion-depth 0}}]
+  [scene eye direction {:keys [reflection-depth k]
+                        :or {reflection-depth 0}}]
   (shoot-ray-iteration
     (create-ray (:position eye) direction)
-    scene eye recursion-depth k))
+    scene eye reflection-depth k))
 
 (defn pixel-coordinates
   [screen-width screen-height]
@@ -235,5 +235,5 @@
 (defn trace-from-file
   [file-name]
   (let [{:keys [view scene parameters]} (binding [*ns* (find-ns 'clj-ray-tracer.core)]
-                               (-> file-name slurp read-string eval))]
+                                          (-> file-name slurp read-string eval))]
     (trace scene view parameters)))
