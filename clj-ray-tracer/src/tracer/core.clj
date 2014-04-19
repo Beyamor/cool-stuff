@@ -1,5 +1,6 @@
 (ns tracer.core
-  (:use [clojure.java.io :only [file]])
+  (:use [clojure.java.io :only [file]]
+        tracer.util)
   (:require [euclidean.math.vector :as v]
             [lonocloud.synthread :as ->]
             [tracer.color :as color])
@@ -8,15 +9,6 @@
            javax.imageio.ImageIO))
 
 (set! *warn-on-reflection* true)
-
-(defn v3
-  [x y z]
-  (v/vector x y z))
-
-(defn reflect-around
-  [d normal]
-  (v/sub d
-         (->> (v/dot normal d) (* 2) (v/scale normal))))
 
 (defprotocol Shape
   (intersection [shape ray])
@@ -157,8 +149,6 @@
           pixel-y pixel-ys]
       [pixel-x pixel-y])))
 
-(def half #(/ % 2))
-
 (defn ray-offsets
   [antialiasing-on?]
   (if antialiasing-on?
@@ -172,15 +162,8 @@
             (for [[x-offset y-offset] (-> parameters :antialiasing ray-offsets)
                   :let [x (-> (+ pixel-x x-offset) (- (half screen-width)) (/ (half screen-width)))
                         y (-> (half screen-height) (- (+ pixel-y y-offset)) (/ (half screen-height)))
-                        direction (v/normalize (v3 x y -1))]]
+                        direction (v/normalize (v/vector x y -1))]]
               (shoot-ray scene eye direction parameters)))})
-
-(defn pmap!
-  [f coll]
-  (->> coll
-       (map #(future (f %)))
-       doall
-       (map deref)))
 
 (defn trace
   [scene {:keys [width height] :as view} parameters]
