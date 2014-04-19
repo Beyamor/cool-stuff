@@ -12,11 +12,20 @@
   [x y z]
   (v/vector x y z))
 
+(defmethod print-dup java.awt.Color
+  [^Color color ^java.io.Writer stream]
+  (.write stream
+          (str "#=(java.awt.Color. " (.getRGB color) ")")))
+
 (defn ->color
   [r g b]
   (Color. (-> r (min 255) int)
           (-> g (min 255) int)
           (-> b (min 255) int)))
+
+(defn create-color
+  [color-name]
+  (-> Color (.getField color-name) (.get nil)))
 
 (defn color-binop
   [op ^Color c1 ^Color c2]
@@ -86,6 +95,10 @@
         (v/sub center)
         v/normalize)))
 
+(defn create-sphere
+  [{:keys [center radius]}]
+  (->Sphere (v/into-vector center) radius))
+
 (defrecord Plane [point normal]
   Shape
   (intersection
@@ -100,6 +113,10 @@
   (normal-at-point
     [_ point]
     normal))
+
+(defn create-plane
+  [{:keys [point normal]}]
+  (->Plane (v/into-vector point) (v/normalize (v/into-vector normal))))
 
 (defn create-ray
   [point direction]
