@@ -12,30 +12,33 @@
   [x y z]
   (v/vector x y z))
 
-(defn add-scaled-color
-  [^Color base ^Color color scale]
-  (Color.
-    (-> color .getRed   (* scale) (+ (.getRed base))    (min 255) int)
-    (-> color .getGreen (* scale) (+ (.getGreen base))  (min 255) int)
-    (-> color .getBlue  (* scale) (+ (.getBlue base))   (min 255) int)))
+(defn ->color
+  [r g b]
+  (Color. (-> r (min 255) int)
+          (-> g (min 255) int)
+          (-> b (min 255) int)))
 
 (defn add-color
-  [base color]
-  (add-scaled-color base color 1))
+  [^Color base ^Color color]
+  (->color (-> color .getRed   (+ (.getRed base)))
+           (-> color .getGreen (+ (.getGreen base)))
+           (-> color .getBlue  (+ (.getBlue base)))))
 
 (defn scale-color
   [^Color color scale]
-  (Color.
-    (-> color .getRed   (* scale) (min 255) int)
-    (-> color .getGreen (* scale) (min 255) int)
-    (-> color .getBlue  (* scale) (min 255) int)))
+  (->color (-> color .getRed   (* scale))
+           (-> color .getGreen (* scale))
+           (-> color .getBlue  (* scale))))
+
+(defn add-scaled-color
+  [base color scale]
+  (add-color base (scale-color color scale)))
 
 (defn multiply-colors
   [^Color base ^Color color]
-  (Color.
-    (-> color .getRed   (* (.getRed base))    (/ 255) (min 255) int)
-    (-> color .getGreen (* (.getGreen base))  (/ 255) (min 255) int)
-    (-> color .getBlue  (* (.getBlue base))   (/ 255) (min 255) int)))
+  (->color (-> color .getRed   (* (.getRed base)))
+           (-> color .getGreen (* (.getGreen base)))
+           (-> color .getBlue  (* (.getBlue base)))))
 
 (defn reflect-around-normal
   [d normal]
